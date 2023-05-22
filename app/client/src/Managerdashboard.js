@@ -103,6 +103,9 @@ function Managerdashboard() {
     };
 
     const renderAudienceTable = () => {
+        if (audienceList.length === 0) {
+            return <p>No audience found.</p>;
+        }
         return (
             <table>
                 <thead>
@@ -223,6 +226,9 @@ function Managerdashboard() {
     };
 
     const renderDirectorTable = () => {
+        if (directorList.length === 0) {
+            return <p>No directors found.</p>;
+        }
         return (
             <table>
                 <thead>
