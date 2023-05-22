@@ -85,14 +85,14 @@ To start the development servers, follow these steps:
   source droptables.sql;
   ```
   
-2. Start the Flask development server:
+2. In a seperate terminal where you installed the requirements from requirements.txt, Start the Flask development server:
 - Navigate to the `flask-server` directory.
 - Run the Flask server:
   ```
   python server.py
   ```
   
-3. Start the React development server:
+3. In a seperate terminal where you installed the requirements from package.json using npm, Start the React development server:
 - Navigate to the `client` directory:
 - Run the development server:
   ```
