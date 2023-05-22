@@ -7,10 +7,17 @@ function Managerdashboard() {
     const navigate = useNavigate();
     const handleRedirectToLogin = () => {
         navigate('/login');
-      };
+    };
 
+    // Variable to keep track of the current tab.
     const [currentTab, setCurrentTab] = useState('');
+    
+    // Handle tab navigation.
+    const handleTabClick = (tabName) => {
+        setCurrentTab(tabName);
+    };
 
+    // Variables related to Audience tab.
     const [newAudience, setNewAudience] = useState({
         user_name: '',
         audience_password: '',
@@ -20,29 +27,7 @@ function Managerdashboard() {
     const [deleteAudience, setDeleteAudience] = useState('');
     const [audienceList, setAudienceList] = useState([]);
 
-    const [newDirector, setNewDirector] = useState({
-        user_name: '',
-        director_password: '',
-        director_name: '',
-        director_surname: '',
-        nationality: '',
-        platform_id: ''
-    });
-    const [changeDirectorPlatform, setChangeDirectorPlatform] = useState({
-        user_name: '',
-        platform_id: ''
-    });
-    const [ratingSearch, setRatingSearch] = useState('');
-    const [movieSearch, setMovieSearch] = useState('');
-
-    const handleTabClick = (tabName) => {
-        setCurrentTab(tabName);
-    };
-
-    useEffect(() => {
-        fetchAudienceList();
-    }, []);
-
+    // Handle audience tab actions.
     const fetchAudienceList = () => {
         fetch('/manager-dashboard/audience', {
             method: 'GET',
@@ -65,7 +50,6 @@ function Managerdashboard() {
                 console.error('Error:', error);
             });
     };
-
 
     const handleAddAudience = (e) => {
         e.preventDefault();
@@ -143,32 +127,134 @@ function Managerdashboard() {
         );
     };
 
+    // Variables related to Director tab.
+    const [newDirector, setNewDirector] = useState({
+        user_name: '',
+        director_password: '',
+        director_name: '',
+        director_surname: '',
+        nationality: '',
+        platform_id: ''
+    });
+    const [changeDirectorPlatform, setChangeDirectorPlatform] = useState({
+        user_name: '',
+        platform_id: ''
+    });
+    const [directorList, setDirectorList] = useState([]);
+
+    // Handle director tab actions.
+    const fetchDirectorList = () => {
+        fetch('/manager-dashboard/director', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch director list');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Director List:', data);
+                // Update the directorList state with the fetched data
+                setDirectorList(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    };
+
     const handleAddDirector = (e) => {
         e.preventDefault();
-        // Logic to handle adding a new director
-        console.log('New Director:', newDirector);
-        // Reset the form fields
-        setNewDirector({
-            user_name: '',
-            director_password: '',
-            director_name: '',
-            director_surname: '',
-            nationality: '',
-            platform_id: ''
-        });
+
+        fetch('/manager-dashboard/director', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newDirector),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Add Director Response:', data);
+                // Refresh the director list after adding a new director
+                fetchDirectorList();
+                // Reset the form fields
+                setNewDirector({
+                    user_name: '',
+                    director_password: '',
+                    director_name: '',
+                    director_surname: '',
+                    nationality: '',
+                    platform_id: '',
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
 
     const handleChangeDirectorPlatform = (e) => {
         e.preventDefault();
-        // Logic to handle changing the platform ID of a director
-        console.log('Change Director Platform:', changeDirectorPlatform);
-        // Reset the form fields
-        setChangeDirectorPlatform({
-            user_name: '',
-            platform_id: ''
-        });
+
+        fetch('/manager-dashboard/director', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(changeDirectorPlatform),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Change Director Platform Response:', data);
+                // Refresh the director list after changing the platform ID
+                fetchDirectorList();
+                // Reset the form fields
+                setChangeDirectorPlatform({
+                    user_name: '',
+                    platform_id: '',
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
 
+    const renderDirectorTable = () => {
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Password</th>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Nationality</th>
+                        <th>Platform ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {directorList.map((director) => (
+                        <tr key={director.user_name}>
+                            <td>{director.user_name}</td>
+                            <td>{director.director_password}</td>
+                            <td>{director.director_name}</td>
+                            <td>{director.director_surname}</td>
+                            <td>{director.nationality}</td>
+                            <td>{director.platform_id}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
+    // Variables related to ratings tab.
+    const [ratingSearch, setRatingSearch] = useState('');
+
+    // Handle ratings tab actions.
     const handleRatingSearch = (e) => {
         e.preventDefault();
         // Logic to handle rating search
@@ -177,6 +263,10 @@ function Managerdashboard() {
         setRatingSearch('');
     };
 
+    // Variables related to movies tab.
+    const [movieSearch, setMovieSearch] = useState('');
+
+    // Handle movies tab actions.
     const handleMovieSearch = (e) => {
         e.preventDefault();
         // Logic to handle movie search
@@ -185,6 +275,13 @@ function Managerdashboard() {
         setMovieSearch('');
     };
 
+    // Fetch current lists to render once initially without additional actions required.
+    useEffect(() => {
+        fetchAudienceList();
+        fetchDirectorList();
+    }, []);
+    
+    // Render content of selected tab.
     const renderContent = () => {
         if (currentTab === 'audience') {
             return (
@@ -319,7 +416,7 @@ function Managerdashboard() {
                     </form>
 
                     <h2>Current Directors</h2>
-                    {/* Table of Current Directors */}
+                    {renderDirectorTable()}
                 </div>
             );
         } else if (currentTab === 'ratings') {
@@ -366,6 +463,7 @@ function Managerdashboard() {
         }
     };
 
+    // Simple navigation bar.
     return (
         <div>
             <div className='button-container'>
