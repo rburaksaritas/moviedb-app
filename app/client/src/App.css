@@ -20,7 +20,7 @@
   }
 }
 
-.vsc-initialized{
+.vsc-initialized {
   padding: 0;
   margin: 0;
 }
@@ -36,7 +36,6 @@
   color: white;
 }
 
-
 .App-link {
   color: #61dafb;
 }
@@ -50,6 +49,23 @@
   }
 }
 
+.content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.large-container {
+  display: flex;
+  flex-direction: row;
+  padding: 5%;
+  justify-content: space-around;
+}
+
+h2 {
+  font-size: large;
+  font-weight: 800;
+}
 /* Update the button styles */
 
 .button {
@@ -74,7 +90,50 @@
   background-color: #1d9fb7;
 }
 
-#logout-button{
+#logout-button {
   background-color: #5d93ff;
   color: #ffffff;
+}
+
+/* Update the form styles */
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+label {
+  margin-bottom: 5px;
+}
+
+input {
+  padding: 8px;
+  margin-bottom: 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #f1f1f1;
+  color: #1a1a1a;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #43c4db;
+  color: #fff;
+}
+
+.button:active {
+  background-color: #1d9fb7;
 }
