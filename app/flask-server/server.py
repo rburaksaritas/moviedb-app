@@ -49,6 +49,7 @@ def login():
         return {"error": str(error)}
 
 # Database Manager
+
 # Audience Management Routes
 @app.route("/manager-dashboard/audience", methods=["POST"])
 def add_audience():
@@ -200,6 +201,85 @@ def get_director_list():
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
+
+# Ratings management routes
+
+@app.route("/manager-dashboard/ratings", methods=["POST"])
+def search_ratings():
+    try:
+        # Get the user_name from the request body
+        data = request.get_json()
+        user_name = data.get('user_name')
+
+        # Perform the necessary database operation to fetch the ratings for the given user_name
+        # Fetch the movie_id, movie_name, and rating from the 'ratings' table for the provided user_name
+        query = "SELECT ratings.movie_id, movies.movie_name, ratings.rating FROM ratings " \
+                "JOIN movies ON ratings.movie_id = movies.movie_id WHERE ratings.user_name = %s"
+        args = (user_name,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        rating_list = []
+        for row in result:
+            movie_id, movie_name, rating = row
+            rating_data = {
+                "movie_id": movie_id,
+                "movie_name": movie_name,
+                "rating": rating
+            }
+            rating_list.append(rating_data)
+
+        # Return the rating list as a JSON response
+        return jsonify(rating_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Movies management routes
+
+@app.route("/manager-dashboard/movies", methods=["POST"])
+def search_movies():
+    try:
+        # Get the director username from the request body
+        data = request.get_json()
+        user_name = data.get('user_name')
+
+        # Perform the necessary database operation to fetch the movies by director username
+        # Fetch the movie_id, movie_name, theatre_id, district, and time_slot from the relevant tables
+        query = """
+            SELECT movies.movie_id, movies.movie_name, theatre.theatre_id, theatre.district, session.time_slot
+            FROM movies
+            JOIN directed_by ON movies.movie_id = directed_by.movie_id
+            JOIN movie_session ON movies.movie_id = movie_session.movie_id
+            JOIN session ON movie_session.session_id = session.session_id
+            JOIN session_locations ON session.session_id = session_locations.session_id
+            JOIN theatre ON session_locations.theatre_id = theatre.theatre_id
+            WHERE directed_by.user_name = %s
+            """
+
+
+        args = (user_name,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        movie_list = []
+        for row in result:
+            movie_id, movie_name, theatre_id, district, time_slot = row
+            movie = {
+                "movie_id": movie_id,
+                "movie_name": movie_name,
+                "theatre_id": theatre_id,
+                "district": district,
+                "time_slot": time_slot
+            }
+            movie_list.append(movie)
+
+        # Return the movie list as a JSON response
+        return jsonify(movie_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
 
 # Test route
 @app.route("/test", methods=["GET"])

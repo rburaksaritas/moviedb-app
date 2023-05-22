@@ -11,7 +11,7 @@ function Managerdashboard() {
 
     // Variable to keep track of the current tab.
     const [currentTab, setCurrentTab] = useState('');
-    
+
     // Handle tab navigation.
     const handleTabClick = (tabName) => {
         setCurrentTab(tabName);
@@ -253,34 +253,129 @@ function Managerdashboard() {
 
     // Variables related to ratings tab.
     const [ratingSearch, setRatingSearch] = useState('');
+    const [ratingResults, setRatingResults] = useState([]);
 
-    // Handle ratings tab actions.
+    // Handle rating tab actions.
+    const fetchRatings = () => {
+
+        fetch('/manager-dashboard/ratings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_name: ratingSearch }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ratings');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Rating Results:', data);
+                // Update the ratingResults state with the fetched data
+                setRatingResults(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    };
+
     const handleRatingSearch = (e) => {
         e.preventDefault();
-        // Logic to handle rating search
+        fetchRatings();
         console.log('Rating Search:', ratingSearch);
         // Reset the form field
         setRatingSearch('');
     };
 
+    const renderRatingResults = () => {
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        <th>Movie ID</th>
+                        <th>Movie Name</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {ratingResults.map((rating) => (
+                        <tr key={rating.movie_id}>
+                            <td>{rating.movie_id}</td>
+                            <td>{rating.movie_name}</td>
+                            <td>{rating.rating}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
     // Variables related to movies tab.
     const [movieSearch, setMovieSearch] = useState('');
+    const [movieResults, setMovieList] = useState([]);
 
     // Handle movies tab actions.
     const handleMovieSearch = (e) => {
         e.preventDefault();
-        // Logic to handle movie search
-        console.log('Movie Search:', movieSearch);
-        // Reset the form field
-        setMovieSearch('');
+
+        fetch('/manager-dashboard/movies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_name: movieSearch }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Movie Search Results:', data);
+                setMovieList(data);
+                setMovieSearch('');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
+
+    const renderMovieResults = () => {
+        if (movieResults.length === 0) {
+            return <p>No movies found.</p>;
+        }
+
+        return (
+            <table>
+                <thead>
+                    <tr>
+                        <th>Movie ID</th>
+                        <th>Movie Name</th>
+                        <th>Theatre ID</th>
+                        <th>District</th>
+                        <th>Time Slot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {movieResults.map((movie) => (
+                        <tr key={movie.movie_id}>
+                            <td>{movie.movie_id}</td>
+                            <td>{movie.movie_name}</td>
+                            <td>{movie.theatre_id}</td>
+                            <td>{movie.district}</td>
+                            <td>{movie.time_slot}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
 
     // Fetch current lists to render once initially without additional actions required.
     useEffect(() => {
         fetchAudienceList();
         fetchDirectorList();
     }, []);
-    
+
     // Render content of selected tab.
     const renderContent = () => {
         if (currentTab === 'audience') {
@@ -320,7 +415,7 @@ function Managerdashboard() {
                                 setNewAudience({ ...newAudience, audience_surname: e.target.value })
                             }
                         />
-                        <button type='submit'>Add Audience</button>
+                        <button type='submit' className='button'>Add Audience</button>
                     </form>
 
                     <h2>Delete Audience</h2>
@@ -331,7 +426,7 @@ function Managerdashboard() {
                             value={deleteAudience}
                             onChange={(e) => setDeleteAudience(e.target.value)}
                         />
-                        <button type='submit'>Delete Audience</button>
+                        <button type='submit' className='button'>Delete Audience</button>
                     </form>
 
                     <h2>Current Audiences</h2>
@@ -391,7 +486,7 @@ function Managerdashboard() {
                                 setNewDirector({ ...newDirector, platform_id: e.target.value })
                             }
                         />
-                        <button type='submit'>Add Director</button>
+                        <button type='submit' className='button'>Add Director</button>
                     </form>
 
                     <h2>Change Platform ID</h2>
@@ -412,7 +507,7 @@ function Managerdashboard() {
                                 setChangeDirectorPlatform({ ...changeDirectorPlatform, platform_id: e.target.value })
                             }
                         />
-                        <button type='submit'>Change Platform ID</button>
+                        <button type='submit' className='button'>Change Platform ID</button>
                     </form>
 
                     <h2>Current Directors</h2>
@@ -430,9 +525,9 @@ function Managerdashboard() {
                             value={ratingSearch}
                             onChange={(e) => setRatingSearch(e.target.value)}
                         />
-                        <button type='submit'>Search Ratings</button>
+                        <button type='submit' className='button'>Search Ratings</button>
                     </form>
-                    {/* Display ratings based on search */}
+                    {renderRatingResults()}
                 </div>
             );
         } else if (currentTab === 'movies') {
@@ -446,9 +541,9 @@ function Managerdashboard() {
                             value={movieSearch}
                             onChange={(e) => setMovieSearch(e.target.value)}
                         />
-                        <button type='submit'>Search Movies</button>
+                        <button type='submit' className='button'>Search Movies</button>
                     </form>
-                    {/* Display movies based on search */}
+                    {renderMovieResults()}
                 </div>
             );
         } else if (currentTab === 'average-rating') {
@@ -467,12 +562,12 @@ function Managerdashboard() {
     return (
         <div>
             <div className='button-container'>
-                <button onClick={() => handleTabClick('audience')}>Audience</button>
-                <button onClick={() => handleTabClick('directors')}>Directors</button>
-                <button onClick={() => handleTabClick('ratings')}>Ratings</button>
-                <button onClick={() => handleTabClick('movies')}>Movies</button>
-                <button onClick={() => handleTabClick('average-rating')}>Average Rating</button>
-                <button onClick={() => handleRedirectToLogin()} className='logout-button'>Logout</button>
+                <button onClick={() => handleTabClick('audience')} className='button'>Audience</button>
+                <button onClick={() => handleTabClick('directors')} className='button'>Directors</button>
+                <button onClick={() => handleTabClick('ratings')} className='button'>Ratings</button>
+                <button onClick={() => handleTabClick('movies')} className='button'>Movies</button>
+                <button onClick={() => handleTabClick('average-rating')} className='button'>Average Rating</button>
+                <button onClick={() => handleRedirectToLogin()} className='button' id='logout-button'>Logout</button>
             </div>
             <div className='content-container'>{renderContent()}</div>
         </div>

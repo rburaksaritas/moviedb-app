@@ -50,10 +50,12 @@
   }
 }
 
-/* Update the login button styles */
+/* Update the button styles */
+
 .button {
   display: inline-block;
   padding: 10px 20px;
+  margin: 0.2rem;
   background-color: #f1f1f1;
   color: #1a1a1a;
   font-size: 16px;
@@ -70,4 +72,9 @@
 
 .button:active {
   background-color: #1d9fb7;
+}
+
+#logout-button{
+  background-color: #5d93ff;
+  color: #ffffff;
 }
