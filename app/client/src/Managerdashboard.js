@@ -290,6 +290,9 @@ function Managerdashboard() {
     };
 
     const renderRatingResults = () => {
+        if (ratingResults.length === 0) {
+            return <p>No ratings found.</p>;
+        }
         return (
             <table>
                 <thead>
@@ -369,6 +372,58 @@ function Managerdashboard() {
         );
     };
 
+    // Variables related to averate rating tab.
+    const [movieId, setMovieId] = useState('');
+    const [averageRating, setAverageRating] = useState(null);
+
+    // Handle average rating tab actions.
+    const handleGetAverageRating = (e) => {
+        e.preventDefault();
+
+        fetch('/manager-dashboard/average-rating', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ movie_id: movieId }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Average Rating:', data);
+                setAverageRating(data);
+                setMovieId('');
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    };
+
+    const renderAverageRating = () => {
+        if (averageRating) {
+            return (
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Movie ID</th>
+                            <th>Movie Name</th>
+                            <th>Average Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {averageRating.map((movie) => (
+                            <tr key={movie.movie_id}>
+                                <td>{movie.movie_id}</td>
+                                <td>{movie.movie_name}</td>
+                                <td>{movie.average_rating}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            );
+        } else {
+            return <p>No movie rating found.</p>;
+        }
+    };
 
     // Fetch current lists to render once initially without additional actions required.
     useEffect(() => {
@@ -549,8 +604,17 @@ function Managerdashboard() {
         } else if (currentTab === 'average-rating') {
             return (
                 <div>
-                    <h2>Search Average Rating</h2>
-                    {/* Search form for average rating */}
+                    <h2>Get Average Rating</h2>
+                    <form onSubmit={handleGetAverageRating}>
+                        <label>Movie ID: </label>
+                        <input
+                            type='text'
+                            value={movieId}
+                            onChange={(e) => setMovieId(e.target.value)}
+                        />
+                        <button type='submit' className='button'>Submit</button>
+                    </form>
+                    {renderAverageRating()}
                 </div>
             );
         } else {

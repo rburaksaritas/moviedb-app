@@ -280,6 +280,43 @@ def search_movies():
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
+# Average rating management routes
+
+@app.route("/manager-dashboard/average-rating", methods=["POST"])
+def get_movie_rating():
+    try:
+        # Get the movie ID from the request body
+        data = request.get_json()
+        movie_id = data.get('movie_id')
+
+        # Perform the necessary database operation to fetch the movie rating
+        query = """
+        SELECT movies.movie_id, movies.movie_name, AVG(ratings.rating) AS average_rating
+        FROM movies
+        JOIN ratings ON movies.movie_id = ratings.movie_id
+        WHERE movies.movie_id = %s
+        GROUP BY movies.movie_id
+        """
+        args = (movie_id,)
+        result = execute_query(query, args)
+
+        # Check if the movie rating exists
+        if result:
+            rating_list = []
+            for row in result:
+                movie_id, movie_name, average_rating = row
+                rating = {
+                    "movie_id": movie_id,
+                    "movie_name": movie_name,
+                    "average_rating": average_rating
+                }
+                rating_list.append(rating)
+            return jsonify(rating_list)
+        else:
+            return {"error": "Movie rating not found."}
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
 
 # Test route
 @app.route("/test", methods=["GET"])
