@@ -8,7 +8,7 @@ The primary goal of this project is to create a and simple web application that 
 
 Before getting started, make sure you have the following dependencies installed:
 
-- Python (version 3.11.X)
+- Python (version 3.X.X)
 - Node.js (version 8.19.X)
 - MySQL (version 8.0.X)
 
@@ -31,7 +31,7 @@ Follow these steps to set up the project:
   npm install
   ```
 
-#### Database (MySQL)
+#### Database (MySQL)
 
 1. Install MySQL if not already installed:
  - For Windows: Download the MySQL installer from the official website (https://dev.mysql.com/downloads/installer/) and run the installer. Follow the installation wizard to set up MySQL on your system.
@@ -44,24 +44,60 @@ Follow these steps to set up the project:
    sudo apt-get install mysql-server
    ```
 
-#### Flask Server (Python)
+#### Flask Server (Python)
 
 1. Navigate to the `flask-server` directory.
 2. Set up a virtual environment if you wish (recommended):
   ```
   python -m venv venv
   ```
-2.1. Activate the virtual environment:
-  - For Windows:
-  ```
-  venv\Scripts\activate
-  ```
-  - For macOS/Linux:
-  ```
-  source venv/bin/activate
-  ```
+  - 2.1. Activate the virtual environment:
+    - For Windows:
+      ```
+      venv\Scripts\activate
+      ```
+    - For macOS/Linux:
+      ```
+      source venv/bin/activate
+      ```
 3. Install the required Python packages:
-pip install -r requirements.txt
+  ```
+  pip install -r requirements.txt
+  ```
 
+### Usage
 
+To start the development servers, follow these steps:
+
+1. Start the database:
+- Navigate to the `database` directory:
+- Start MySQL CLI:
+  ``` 
+  mysql
+  ````
+- Run the scripts to set up the database:
+  ```
+  source database.sql;
+  source insertdata.sql;
+  ```
+- You can drop the tables if required:
+  ```
+  source droptables.sql;
+  ```
+  
+2. Start the Flask development server:
+- Navigate to the `flask-server` directory.
+- Run the Flask server:
+  ```
+  python server.py
+  ```
+  
+3. Start the React development server:
+- Navigate to the `client` directory:
+- Run the development server:
+  ```
+  npm start
+  ```
+
+The React development server will be accessible at `http://localhost:3000`, and the Flask development server will be accessible at `http://127.0.0.1:5000`.
 
