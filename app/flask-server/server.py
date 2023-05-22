@@ -96,14 +96,12 @@ def delete_audience():
 
 @app.route("/manager-dashboard/audience", methods=["GET"])
 def get_audience_list():
-    print("omg?")
     try:
         # Perform the necessary database operation to fetch the list of audiences
         # Fetch all the audience data from the 'audience' table
         query = "SELECT user_name, audience_password, audience_name, audience_surname FROM audience"
         result = execute_query(query)
         
-        print("before retrievinggg:", result)
         # Transform the result into a list of dictionaries
         audience_list = []
         for row in result:
