@@ -12,9 +12,6 @@ db_config = {
     'database': 'moviedb'
 }
 
-# Create a MySQL connection pool
-cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="my_pool", pool_size=5, **db_config)
-
 def execute_query(query, args=None):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
@@ -314,28 +311,6 @@ def get_movie_rating():
             return jsonify(rating_list)
         else:
             return {"error": "Movie rating not found."}
-
-    except mysql.connector.Error as error:
-        return {"error": str(error)}
-
-# Test route
-@app.route("/test", methods=["GET"])
-def getmanagers():
-    try:
-        # Acquire a connection from the pool
-        cnx = cnxpool.get_connection()
-        # Create a cursor to execute queries
-        cursor = cnx.cursor()
-        # Execute the query
-        query = "SELECT * FROM database_managers"
-        cursor.execute(query)
-        # Fetch all the rows
-        managers = cursor.fetchall()
-        # Close the cursor and release the connection back to the pool
-        cursor.close()
-        cnx.close()
-        # Return the response
-        return {"managers": managers}
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
