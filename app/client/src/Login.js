@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-function Login() {
+function Login({ onLogin }) {
   const navigate = useNavigate();
   const [user_name, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +12,6 @@ function Login() {
     e.preventDefault();
 
     // Perform login logic here
-    // For simplicity, we'll just display the entered username, password, and role
     console.log('user_name:', user_name);
     console.log('password:', password);
     console.log('Role:', role);
@@ -30,6 +29,7 @@ function Login() {
         console.log(data);
         // Handle the response from the backend server
         if (data.status === 'success') {
+          onLogin({ username: user_name, role: role });
           // Login successful, redirect to the appropriate dashboard based on the role
           if (role === 'manager') {
             navigate('/manager-dashboard');
