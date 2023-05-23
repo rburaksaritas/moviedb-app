@@ -5,7 +5,7 @@ import "./App.css";
 function Managerdashboard() {
 
     const navigate = useNavigate();
-    const handleRedirectToLogin = () => {
+    const handleLogout = () => {
         navigate('/login');
     };
 
@@ -663,7 +663,7 @@ function Managerdashboard() {
                 <button onClick={() => handleTabClick('ratings')} className='button'>Ratings</button>
                 <button onClick={() => handleTabClick('movies')} className='button'>Movies</button>
                 <button onClick={() => handleTabClick('average-rating')} className='button'>Average Rating</button>
-                <button onClick={() => handleRedirectToLogin()} className='button' id='logout-button'>Logout</button>
+                <button onClick={() => handleLogout()} className='button' id='logout-button'>Logout</button>
             </div>
             {renderContent()}
         </div>

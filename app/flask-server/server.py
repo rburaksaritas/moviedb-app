@@ -315,5 +315,191 @@ def get_movie_rating():
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
+# Director Dashboard Routes
+
+# Get theaters for a given slot
+@app.route("/director-dashboard/theatres", methods=["GET"])
+def get_theatres_for_slot():
+    try:
+        # Get the time_slot from the request parameters
+        time_slot = request.args.get('time_slot')
+
+        # Perform the necessary database operation to fetch the theatres available for a given slot
+        query = """
+            SELECT theatre_id, district, capacity
+            FROM theatre
+            WHERE theatre_id IN (
+                SELECT theatre_id
+                FROM session_locations
+                WHERE session_id IN (
+                    SELECT session_id
+                    FROM session
+                    WHERE time_slot = %s
+                )
+            )
+            """
+        args = (time_slot,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        theatre_list = []
+        for row in result:
+            theatre_id, district, capacity = row
+            theatre = {
+                "theatre_id": theatre_id,
+                "district": district,
+                "capacity": capacity
+            }
+            theatre_list.append(theatre)
+
+        # Return the theatre list as a JSON response
+        return jsonify(theatre_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# List movies
+@app.route("/director-dashboard/my-movies", methods=["GET"])
+def get_director_movies():
+    try:
+        # Get the director username from the request parameters
+        user_name = request.args.get('user_name')
+
+        # Perform the necessary database operation to fetch the movies directed by the given director
+        query = """
+            SELECT movies.movie_id, movies.movie_name, movies.theatre_id, movies.time_slot,
+                GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
+            FROM movies
+            LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
+            WHERE movies.movie_id IN (
+                SELECT movie_id
+                FROM directed_by
+                WHERE user_name = %s
+            )
+            GROUP BY movies.movie_id, movies.movie_name, movies.theatre_id, movies.time_slot
+            ORDER BY movies.movie_id ASC
+            """
+        args = (user_name,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        movie_list = []
+        for row in result:
+            movie_id, movie_name, theatre_id, time_slot, predecessors = row
+            movie = {
+                "movie_id": movie_id,
+                "movie_name": movie_name,
+                "theatre_id": theatre_id,
+                "time_slot": time_slot,
+                "predecessors": predecessors
+            }
+            movie_list.append(movie)
+
+        # Return the movie list as a JSON response
+        return jsonify(movie_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+        
+# Add new movie
+@app.route("/director-dashboard/add-movie", methods=["POST"])
+def add_movie():
+    try:
+        # Get the movie data from the request body
+        data = request.get_json()
+        movie_id = data.get('movie_id')
+        movie_name = data.get('movie_name')
+        theatre_id = data.get('theatre_id')
+        time_slot = data.get('time_slot')
+
+        # Perform the necessary database operation to add a new movie
+        # Insert the movie data into the 'movies' table
+        query = "INSERT INTO movies (movie_id, movie_name, theatre_id, time_slot) VALUES (%s, %s, %s, %s)"
+        args = (movie_id, movie_name, theatre_id, time_slot)
+        execute_query(query, args)
+
+        # Return a success response
+        return {"status": "success", "message": "Movie added successfully"}
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Add movie predecessor
+@app.route("/director-dashboard/add-predecessor", methods=["POST"])
+def add_predecessor():
+    try:
+        # Get the predecessor data from the request body
+        data = request.get_json()
+        successor_id = data.get('successor_id')
+        predecessor_id = data.get('predecessor_id')
+
+        # Perform the necessary database operation to add a new predecessor
+        # Insert the predecessor data into the 'movie_predecessors' table
+        query = "INSERT INTO movie_predecessors (successor_id, predecessor_id) VALUES (%s, %s)"
+        args = (successor_id, predecessor_id)
+        execute_query(query, args)
+
+        # Return a success response
+        return {"status": "success", "message": "Predecessor added successfully"}
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Update movie name
+@app.route("/director-dashboard/update-movie-name", methods=["PUT"])
+def update_movie_name():
+    try:
+        # Get the movie ID and new movie name from the request body
+        data = request.get_json()
+        movie_id = data.get('movie_id')
+        movie_name = data.get('movie_name')
+
+        # Perform the necessary database operation to update the movie name
+        query = "UPDATE movies SET movie_name = %s WHERE movie_id = %s"
+        args = (movie_name, movie_id)
+        execute_query(query, args)
+
+        # Return a success response
+        return {"status": "success", "message": "Movie name updated successfully"}
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# List audiences for a given movie id 
+@app.route("/director-dashboard/audience-list", methods=["GET"])
+def get_audience_list_for_movie():
+    try:
+        # Get the movie ID from the request parameters
+        movie_id = request.args.get('movie_id')
+
+        # Perform the necessary database operation to fetch the audience who bought tickets for the given movie
+        query = """
+            SELECT audience.user_name, audience.audience_name, audience.audience_surname
+            FROM audience
+            INNER JOIN tickets ON audience.user_name = tickets.user_name
+            INNER JOIN movie_session ON tickets.session_id = movie_session.session_id
+            WHERE movie_session.movie_id = %s
+            """
+        args = (movie_id,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        audience_list = []
+        for row in result:
+            user_name, audience_name, audience_surname = row
+            audience = {
+                "user_name": user_name,
+                "name": audience_name,
+                "surname": audience_surname
+            }
+            audience_list.append(audience)
+
+        # Return the audience list as a JSON response
+        return jsonify(audience_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+        
 if __name__ == "__main__":
     app.run(debug=True)
