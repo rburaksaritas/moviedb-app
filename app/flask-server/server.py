@@ -326,7 +326,7 @@ def get_theatres_for_slot():
         # Get the time_slot from the request parameters
         time_slot = request.args.get('time_slot')
 
-        # Perform the necessary database operation to fetch the theatres available for a given slot
+        # Perform the necessary database operation to fetch the theaters available for a given slot
         query = """
             SELECT theatre_id, district, capacity
             FROM theatre
@@ -359,6 +359,7 @@ def get_theatres_for_slot():
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
+
 
 # Movies tab
 
