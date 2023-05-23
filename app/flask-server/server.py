@@ -317,6 +317,8 @@ def get_movie_rating():
 
 # Director Dashboard Routes
 
+# Theaters tab
+
 # Get theaters for a given slot
 @app.route("/director-dashboard/theatres", methods=["GET"])
 def get_theatres_for_slot():
@@ -357,6 +359,8 @@ def get_theatres_for_slot():
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
+
+# Movies tab
 
 # List movies
 @app.route("/director-dashboard/my-movies", methods=["GET"])
@@ -400,7 +404,7 @@ def get_director_movies():
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
-        
+
 # Add new movie
 @app.route("/director-dashboard/add-movie", methods=["POST"])
 def add_movie():
@@ -465,7 +469,9 @@ def update_movie_name():
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
-# List audiences for a given movie id 
+# Audience tab
+
+# List audience for a given movie id 
 @app.route("/director-dashboard/audience-list", methods=["GET"])
 def get_audience_list_for_movie():
     try:
