@@ -241,10 +241,52 @@ function Directordashboard({ currentUser }) {
     const [audienceList, setAudienceList] = useState([]);
 
     // Handle Audience tab actions.
-    const fetchAudienceList = () => { }
-    const handleAudienceSearch = (e) => { }
-    const renderAudienceTable = () => { }
-    //...
+    const fetchAudienceList = () => {
+        fetch(`/director-dashboard/audience-list?movie_id=${audienceSearch}`)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log('Audience List:', data);
+                setAudienceList(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                setAudienceList([]); // Set an empty array to avoid mapping issues
+            });
+    };
+
+    const handleAudienceSearch = (e) => {
+        e.preventDefault();
+        fetchAudienceList();
+    };
+
+    const renderAudienceTable = () => {
+        if (audienceList.length === 0) {
+            return <p>No audience found.</p>;
+        }
+        return (
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Name</th>
+                            <th>Surname</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {audienceList.map((audience) => (
+                            <tr key={audience.user_name}>
+                                <td>{audience.user_name}</td>
+                                <td>{audience.name}</td>
+                                <td>{audience.surname}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
 
     useEffect(() => {
         fetchTheatersList();
