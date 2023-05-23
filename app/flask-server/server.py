@@ -363,7 +363,7 @@ def get_theatres_for_slot():
 
 # Movies tab
 
-# List movies
+# List movies
 @app.route("/director-dashboard/my-movies", methods=["GET"])
 def get_director_movies():
     try:
@@ -372,16 +372,19 @@ def get_director_movies():
 
         # Perform the necessary database operation to fetch the movies directed by the given director
         query = """
-            SELECT movies.movie_id, movies.movie_name, movies.theatre_id, movies.time_slot,
+            SELECT movies.movie_id, movies.movie_name, session_locations.theatre_id, session.time_slot,
                 GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
             FROM movies
             LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
+            LEFT JOIN movie_session ON movies.movie_id = movie_session.movie_id
+            LEFT JOIN session ON movie_session.session_id = session.session_id
+            LEFT JOIN session_locations ON session_locations.session_id = session.session_id
             WHERE movies.movie_id IN (
                 SELECT movie_id
                 FROM directed_by
                 WHERE user_name = %s
             )
-            GROUP BY movies.movie_id, movies.movie_name, movies.theatre_id, movies.time_slot
+            GROUP BY movies.movie_id, movies.movie_name, session_locations.theatre_id, session.time_slot
             ORDER BY movies.movie_id ASC
             """
         args = (user_name,)
@@ -414,13 +417,42 @@ def add_movie():
         data = request.get_json()
         movie_id = data.get('movie_id')
         movie_name = data.get('movie_name')
+        user_name = data.get('user_name') # director's username
         theatre_id = data.get('theatre_id')
         time_slot = data.get('time_slot')
-
+        session_id = data.get('session_id') # new session id provided by director
+        session_date = data.get('session_date') # new session time provided by director
+        
         # Perform the necessary database operation to add a new movie
         # Insert the movie data into the 'movies' table
-        query = "INSERT INTO movies (movie_id, movie_name, theatre_id, time_slot) VALUES (%s, %s, %s, %s)"
-        args = (movie_id, movie_name, theatre_id, time_slot)
+        query = "INSERT INTO movies (movie_id, movie_name) VALUES (%s, %s)"
+        args = (movie_id, movie_name)
+        execute_query(query, args)
+
+        # Get the platform_id of the director
+        query = "SELECT platform_id FROM directors WHERE user_name = %s"
+        args = (user_name,)
+        result = execute_query(query, args)
+        platform_id = result[0][0]
+
+        # Insert new session
+        query = "INSERT INTO session (session_id, session_date, time_slot) VALUES (%s, %s)"
+        args = (session_id, time_slot)
+        execute_query(query, args)
+
+        # Link the new session to the movie
+        query = "INSERT INTO movie_session (movie_id, session_id) VALUES (%s, %s)"
+        args = (movie_id, session_id)
+        execute_query(query, args)
+
+        # Link the new session to the theatre
+        query = "INSERT INTO session_locations (theatre_id, session_id) VALUES (%s, %s)"
+        args = (theatre_id, session_id)
+        execute_query(query, args)
+
+        # Link the new movie to the director
+        query = "INSERT INTO directed_by (movie_id, user_name) VALUES (%s, %s)"
+        args = (movie_id, user_name)
         execute_query(query, args)
 
         # Return a success response
@@ -428,6 +460,8 @@ def add_movie():
 
     except mysql.connector.Error as error:
         return {"error": str(error)}
+
+
 
 # Add movie predecessor
 @app.route("/director-dashboard/add-predecessor", methods=["POST"])
@@ -457,7 +491,7 @@ def update_movie_name():
         # Get the movie ID and new movie name from the request body
         data = request.get_json()
         movie_id = data.get('movie_id')
-        movie_name = data.get('movie_name')
+        movie_name = data.get('new_name')
 
         # Perform the necessary database operation to update the movie name
         query = "UPDATE movies SET movie_name = %s WHERE movie_id = %s"
