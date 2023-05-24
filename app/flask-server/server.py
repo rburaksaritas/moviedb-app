@@ -1,17 +1,11 @@
 from flask import Flask, request, redirect, render_template, jsonify
 import mysql.connector
 from login import handle_login
+from db_config import db_config
 
 app = Flask(__name__)
 
-# MySQL connection configuration
-db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '',
-    'database': 'moviedb'
-}
-
+# Execute query
 def execute_query(query, args=None):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
@@ -46,7 +40,6 @@ def login():
         return {"error": str(error)}
 
 # Database Manager
-
 # Audience Management Routes
 @app.route("/manager-dashboard/audience", methods=["POST"])
 def add_audience():
@@ -122,7 +115,6 @@ def get_audience_list():
 
 
 # Director Management Routes
-
 @app.route("/manager-dashboard/director", methods=["POST"])
 def add_director():
     try:
@@ -200,7 +192,6 @@ def get_director_list():
         return {"error": str(error)}
 
 # Ratings management routes
-
 @app.route("/manager-dashboard/ratings", methods=["POST"])
 def search_ratings():
     try:
@@ -233,7 +224,6 @@ def search_ratings():
         return {"error": str(error)}
 
 # Movies management routes
-
 @app.route("/manager-dashboard/movies", methods=["POST"])
 def search_movies():
     try:
@@ -278,7 +268,6 @@ def search_movies():
         return {"error": str(error)}
 
 # Average rating management routes
-
 @app.route("/manager-dashboard/average-rating", methods=["POST"])
 def get_movie_rating():
     try:
