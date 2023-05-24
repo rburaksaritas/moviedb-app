@@ -1,10 +1,27 @@
-### MovieDB-App for CMPE321: Database Systems
+# MovieDB App for CMPE321: Database Systems
 
 Welcome to the MovieDB-App for CMPE321: Database Systems repository! This is a simple web application that utilizes Flask, Python, MySQL, and React. The application provides a user interface (UI) for different types of users, including Managers, Directors, and the Audience, allowing them to interact with the system.
 
-The primary goal of this project is to create a and simple web application that connects to a MySQL database. With this application, users have the ability to perform various actions based on their assigned roles. 
+The primary goal of this project is to create a and simple web application that connects to a MySQL database. With this application, users have the ability to perform various actions based on their assigned roles.
 
-### Prerequisites
+## Features
+
+The MovieDB-App provides the following features:
+- Role-based access control.
+- Managers can manage movies, directors, and ratings.
+- Directors can manage movies they directed.
+- The Audience can view movie listings, buy tickets, and rate movies.
+- Overall rating calculation for movies. 
+
+## Project Structure
+
+The project follows a specific structure to organize the codebase:
+- app/: Main directory of the app.
+  - client/: Contains the React client-side code.
+  - flask-server/: Contains the Flask server-side code.
+  - database/: Contains MySQL scripts and database-related files.
+
+## Prerequisites
 
 Before getting started, make sure you have the following dependencies installed:
 
@@ -12,7 +29,7 @@ Before getting started, make sure you have the following dependencies installed:
 - Node.js (version 8.19.X)
 - MySQL (version 8.0.X)
 
-### Installation
+## Installation
 
 Follow these steps to set up the project:
 
@@ -20,7 +37,7 @@ Follow these steps to set up the project:
 
 2. Navigate to the `app` folder.
 
-#### Client (React)
+### Client (React)
 
 1. Install Node.js and npm if not already installed:
 - If Node.js and npm are not installed, follow the official instructions for your operating system:
@@ -31,7 +48,7 @@ Follow these steps to set up the project:
   npm install
   ```
 
-#### Database (MySQL)
+### Database (MySQL)
 
 1. Install MySQL if not already installed:
  - For Windows: Download the MySQL installer from the official website (https://dev.mysql.com/downloads/installer/) and run the installer. Follow the installation wizard to set up MySQL on your system.
@@ -44,7 +61,7 @@ Follow these steps to set up the project:
    sudo apt-get install mysql-server
    ```
 
-#### Flask Server (Python)
+### Flask Server (Python)
 
 1. Navigate to the `flask-server` directory.
 2. Set up a virtual environment if you wish (recommended):
@@ -65,7 +82,7 @@ Follow these steps to set up the project:
   pip install -r requirements.txt
   ```
 
-### Usage
+## Usage
 
 To start the development servers, follow these steps:
 
