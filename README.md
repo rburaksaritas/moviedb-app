@@ -104,6 +104,17 @@ To start the development servers, follow these steps:
   
 2. In a seperate terminal where you installed the requirements from requirements.txt, Start the Flask development server:
 - Navigate to the `flask-server` directory.
+- Open `db_config.py` in a text editor of your choice.
+- Modify the user and password in `db_config()` based on your configuration, save and close the editor.
+  ```
+  # MySQL connection configuration
+  db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'moviedb'
+  }
+  ```
 - Run the Flask server:
   ```
   python server.py
