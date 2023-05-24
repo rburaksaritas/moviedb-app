@@ -606,13 +606,20 @@ def get_tickets_list():
 
         # Perform the necessary database operation to fetch the tickets list for the given user
         query = """
-        SELECT movies.movie_id, movies.movie_name, tickets.session_id, ratings.rating, AVG(ratings.rating) OVER(PARTITION BY movies.movie_id) AS overall_rating
-        FROM tickets
-        JOIN movie_session ON tickets.session_id = movie_session.session_id
-        JOIN movies ON movie_session.movie_id = movies.movie_id
-        LEFT JOIN ratings ON tickets.session_id = ratings.movie_id AND tickets.user_name = ratings.user_name
-        WHERE tickets.user_name = %s
-        """
+            SELECT
+            movies.movie_id,
+            movies.movie_name,
+            tickets.session_id,
+            ratings.rating,
+            (SELECT AVG(rating) FROM ratings WHERE movie_id = movie_session.movie_id) AS overall_rating
+            FROM
+            tickets
+            JOIN movie_session ON tickets.session_id = movie_session.session_id
+            JOIN movies ON movie_session.movie_id = movies.movie_id
+            LEFT JOIN ratings ON movie_session.movie_id = ratings.movie_id AND tickets.user_name = ratings.user_name
+            WHERE
+            tickets.user_name = %s
+            """
         args = (user_name,)
         result = execute_query(query, args)
 
@@ -636,6 +643,7 @@ def get_tickets_list():
         return {"error": str(error)}
 
 # Buy Ticket
+import uuid # for random ticked id generation
 @app.route("/audience-dashboard/buy-ticket", methods=["POST"])
 def buy_ticket():
     try:

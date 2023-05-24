@@ -79,8 +79,8 @@ function AudienceDashboard({ currentUser }) {
             })
             .then((data) => {
                 console.log('Buy Ticket Response:', data);
-                // Refresh the tickets list
                 fetchTicketsList();
+                // Refresh the tickets list
                 setSelectedSession('');
             })
             .catch((error) => {
@@ -165,7 +165,7 @@ function AudienceDashboard({ currentUser }) {
     const renderContent = () => {
         if (currentTab === 'movies') {
             return (
-                <div>
+                <div className='results-container'>
                     <h2>Movies List</h2>
                     {renderMoviesList()}
                 </div>
@@ -173,16 +173,18 @@ function AudienceDashboard({ currentUser }) {
         } else if (currentTab === 'tickets') {
             return (
                 <div>
-                    <h2>Tickets List</h2>
-                    {renderTicketsList()}
+                    <div className='results-container'>
+                        <h2>Tickets List</h2>
+                        {renderTicketsList()}
+                    </div>
                     <h2>Buy Ticket</h2>
                     <form onSubmit={buyTicket}>
                         <label>Select Session:</label>
                         <select value={selectedSession} onChange={(e) => setSelectedSession(e.target.value)}>
                             <option value="">Select Session</option>
                             {sessionList.map((session) => (
-                                <option key={session.session_id} value={session.session_id}>
-                                    {session.session_id}
+                                <option key={session} value={session}>
+                                    {session}
                                 </option>
                             ))}
                         </select>
@@ -196,10 +198,12 @@ function AudienceDashboard({ currentUser }) {
     };
 
     return (
-        <div>
-            <button onClick={() => setCurrentTab('movies')} className='button'>Movies</button>
-            <button onClick={() => setCurrentTab('tickets')} className='button'>Tickets</button>
-            <button onClick={handleLogout} className='button' id='logout-button'>Logout</button>
+        <div className='content-container'>
+            <div className='button-container'>
+                <button onClick={() => handleTabClick('movies')} className='button'>Movies</button>
+                <button onClick={() => handleTabClick('tickets')} className='button'>Tickets</button>
+                <button onClick={handleLogout} className='button' id='logout-button'>Logout</button>
+            </div>
             {renderContent()}
         </div>
     );
