@@ -4,6 +4,7 @@ import Login from './Login';
 import Home from './Home';
 import Managerdashboard from './Managerdashboard';
 import Directordashboard from './Directordashboard';
+import AudienceDashboard from './Audiencedashboard';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -35,7 +36,13 @@ function App() {
               : <Login onLogin={handleLogin}/>
             } 
           />
-          {/* Add other routes for different pages */}
+          <Route
+            path="/audience-dashboard"
+            element = {currentUser && currentUser.role === 'audience'
+              ? <AudienceDashboard currentUser={currentUser} onLogout={handleLogout} />
+              : <Login onLogin={handleLogin}/>
+            }
+          />
         </Routes>
     </Router>
   );

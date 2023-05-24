@@ -316,9 +316,7 @@ def get_movie_rating():
         return {"error": str(error)}
 
 # Director Dashboard Routes
-
 # Theaters tab
-
 # Get theaters for a given slot
 @app.route("/director-dashboard/theatres", methods=["GET"])
 def get_theatres_for_slot():
@@ -360,9 +358,7 @@ def get_theatres_for_slot():
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
-
 # Movies tab
-
 # List movies
 @app.route("/director-dashboard/my-movies", methods=["GET"])
 def get_director_movies():
@@ -462,7 +458,6 @@ def add_movie():
         return {"error": str(error)}
 
 
-
 # Add movie predecessor
 @app.route("/director-dashboard/add-predecessor", methods=["POST"])
 def add_predecessor():
@@ -505,7 +500,6 @@ def update_movie_name():
         return {"error": str(error)}
 
 # Audience tab
-
 # List audience for a given movie id 
 @app.route("/director-dashboard/audience-list", methods=["GET"])
 def get_audience_list_for_movie():
@@ -541,6 +535,128 @@ def get_audience_list_for_movie():
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
-        
+# Audience Dashboard Routes
+# Movies Tab
+# Movies List
+@app.route("/audience-dashboard/movies-list", methods=["GET"])
+def get_movies_list():
+    try:
+        # Perform the necessary database operation to fetch the movies list
+        query = """
+        SELECT movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
+               session_locations.theatre_id, session.time_slot, GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
+        FROM movies
+        JOIN directed_by ON movies.movie_id = directed_by.movie_id
+        JOIN directors ON directed_by.user_name = directors.user_name
+        JOIN rating_platforms ON directors.platform_id = rating_platforms.platform_id
+        JOIN movie_session ON movies.movie_id = movie_session.movie_id
+        JOIN session ON movie_session.session_id = session.session_id
+        JOIN session_locations ON session_locations.session_id = session.session_id
+        LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
+        GROUP BY movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
+                 session_locations.theatre_id, session.time_slot
+        """
+        result = execute_query(query)
+
+        # Transform the result into a list of dictionaries
+        movies_list = []
+        for row in result:
+            movie_id, movie_name, director_surname, platform, theatre_id, time_slot, predecessors = row
+            movie = {
+                "movie_id": movie_id,
+                "movie_name": movie_name,
+                "director_surname": director_surname,
+                "platform": platform,
+                "theatre_id": theatre_id,
+                "time_slot": time_slot,
+                "predecessors": predecessors
+            }
+            movies_list.append(movie)
+
+        # Return the movies list as a JSON response
+        return jsonify(movies_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Tickets tab
+# Session List
+@app.route("/audience-dashboard/session-list", methods=["GET"])
+def get_session_list():
+    try:
+        # Perform the necessary database operation to fetch the session list
+        query = "SELECT session_id FROM session"
+        result = execute_query(query)
+
+        # Transform the result into a list of session IDs
+        session_list = [row[0] for row in result]
+
+        # Return the session list as a JSON response
+        return jsonify(session_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Tickets List
+@app.route("/audience-dashboard/tickets-list", methods=["GET"])
+def get_tickets_list():
+    try:
+        # Get the username from the request parameters
+        user_name = request.args.get('user_name')
+
+        # Perform the necessary database operation to fetch the tickets list for the given user
+        query = """
+        SELECT movies.movie_id, movies.movie_name, tickets.session_id, ratings.rating, AVG(ratings.rating) OVER(PARTITION BY movies.movie_id) AS overall_rating
+        FROM tickets
+        JOIN movie_session ON tickets.session_id = movie_session.session_id
+        JOIN movies ON movie_session.movie_id = movies.movie_id
+        LEFT JOIN ratings ON tickets.session_id = ratings.movie_id AND tickets.user_name = ratings.user_name
+        WHERE tickets.user_name = %s
+        """
+        args = (user_name,)
+        result = execute_query(query, args)
+
+        # Transform the result into a list of dictionaries
+        tickets_list = []
+        for row in result:
+            movie_id, movie_name, session_id, rating, overall_rating = row
+            ticket = {
+                "movie_id": movie_id,
+                "movie_name": movie_name,
+                "session_id": session_id,
+                "rating": rating,
+                "overall_rating": overall_rating
+            }
+            tickets_list.append(ticket)
+
+        # Return the tickets list as a JSON response
+        return jsonify(tickets_list)
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
+# Buy Ticket
+@app.route("/audience-dashboard/buy-ticket", methods=["POST"])
+def buy_ticket():
+    try:
+        # Get the user_name and session_id from the request body
+        data = request.get_json()
+        user_name = data.get('user_name')
+        session_id = data.get('session_id')
+
+        # Generate a random ticket_id
+        ticket_id = str(uuid.uuid4())
+
+        # Perform the necessary database operation to buy a ticket
+        query = "INSERT INTO tickets (ticket_id, user_name, session_id) VALUES (%s, %s, %s)"
+        args = (ticket_id, user_name, session_id)
+        execute_query(query, args)
+
+        # Return a success response
+        return {"status": "success", "message": "Ticket bought successfully"}
+
+    except mysql.connector.Error as error:
+        return {"error": str(error)}
+
 if __name__ == "__main__":
     app.run(debug=True)
