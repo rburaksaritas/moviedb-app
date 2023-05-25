@@ -1,6 +1,6 @@
 # MovieDB App for CMPE321: Database Systems
 
-Welcome to the MovieDB-App for CMPE321: Database Systems repository! This is a simple web application that utilizes Flask, Python, MySQL, and React. The application provides a user interface (UI) for different types of users, including Managers, Directors, and the Audience, allowing them to interact with the system.
+Welcome to the MovieDB App respository, for the 3rd project of CMPE321: Database Systems course. This is a simple web application that utilizes Flask, Python, MySQL, and React. The application provides a user interface (UI) for different types of users, including Managers, Directors, and the Audience, allowing them to interact with the system.
 
 The primary goal of this project is to create a and simple web application that connects to a MySQL database. With this application, users have the ability to perform various actions based on their assigned roles.
 
