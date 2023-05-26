@@ -182,9 +182,9 @@ END $$
 DELIMITER ;
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS ticket_consistency $$
+DROP TRIGGER IF EXISTS ticket_rate_consistency $$
 
-CREATE TRIGGER ticket_consistency
+CREATE TRIGGER ticket_rate_consistency
 BEFORE INSERT
 ON ratings FOR EACH ROW
 
@@ -215,3 +215,56 @@ BEGIN
     END IF;
 END$$
 DELIMITER ;
+
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS check_theatre_capacity $$
+
+CREATE TRIGGER check_theatre_capacity
+BEFORE INSERT 
+ON tickets FOR EACH ROW
+BEGIN
+    DECLARE theatre_capacity INT;
+    DECLARE used_capacity INT;
+    
+    SELECT t.capacity INTO theatre_capacity
+    FROM theatre t WHERE 
+    t.theatre_id = (SELECT o.theatre_id FROM occupied_slots o WHERE o.session_id = new.session_id);
+    
+    SELECT COUNT(*) INTO used_capacity
+    FROM tickets t WHERE t.session_id = new.session_id;
+
+    IF theatre_capacity <= used_capacity THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'The capacity is full';
+    END IF;
+END$$
+DELIMITER ;
+
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS update_avg_rating $$
+
+CREATE TRIGGER update_avg_rating
+BEFORE INSERT 
+ON ratings FOR EACH ROW
+BEGIN
+    DECLARE avg_rating FLOAT;
+    DECLARE rating_count INT;
+    DECLARE avg_new FLOAT;
+    
+    SELECT m.average_rating INTO avg_rating
+    FROM movies m WHERE 
+    m.movie_id = new.movie_id;
+    
+    SELECT COUNT(*) INTO rating_count
+    FROM ratings r WHERE r.movie_id = new.movie_id;
+
+    SET avg_new = (avg_rating*rating_count+new.rating)/(rating_count+1);
+    
+    UPDATE movies
+    SET average_rating = avg_new
+    WHERE movie_id = new.movie_id;
+
+END$$
+DELIMITER ;
+

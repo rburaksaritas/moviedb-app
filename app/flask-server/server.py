@@ -483,11 +483,14 @@ def get_audience_list_for_movie():
         # Perform the necessary database operation to fetch the audience who bought tickets for the given movie
         query = """
             SELECT audience.user_name, audience.audience_name, audience.audience_surname
-            FROM audience
-            INNER JOIN tickets ON audience.user_name = tickets.user_name
-            INNER JOIN movie_session ON tickets.session_id = movie_session.session_id
-            WHERE movie_session.movie_id = %s
+            FROM audience WHERE audience.user_name IN 
+            (
+                SELECT tickets.user_name FROM tickets WHERE tickets.session_id IN
+                (SELECT m.session_id FROM movie_session m WHERE m.movie_id = %s)
+            )
             """
+        
+
         args = (movie_id,)
         result = execute_query(query, args)
 
@@ -515,19 +518,18 @@ def get_audience_list_for_movie():
 def get_movies_list():
     try:
         # Perform the necessary database operation to fetch the movies list
+        
         query = """
-        SELECT movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
-               session_locations.theatre_id, session.time_slot, GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
+        SELECT movies.movie_id, movies.movie_name, directors_agreements.director_surname, rating_platforms.platform_name, 
+               occupied_slots.theatre_id, occupied_slots.time_slot, GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
         FROM movies
-        JOIN directed_by ON movies.movie_id = directed_by.movie_id
-        JOIN directors ON directed_by.user_name = directors.user_name
-        JOIN rating_platforms ON directors.platform_id = rating_platforms.platform_id
+        JOIN directors_agreements ON movies.director_name = directors_agreements.director_name
+        JOIN rating_platforms ON directors_agreements.platform_id = rating_platforms.platform_id
         JOIN movie_session ON movies.movie_id = movie_session.movie_id
-        JOIN session ON movie_session.session_id = session.session_id
-        JOIN session_locations ON session_locations.session_id = session.session_id
+        JOIN occupied_slots ON movie_session.session_id = occupied_slots.session_id
         LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
-        GROUP BY movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
-                 session_locations.theatre_id, session.time_slot
+        GROUP BY movies.movie_id, movies.movie_name, directors_agreements.director_surname, rating_platforms.platform_name, 
+                 occupied_slots.theatre_id, occupied_slots.time_slot
         """
         result = execute_query(query)
 
@@ -558,7 +560,7 @@ def get_movies_list():
 def get_session_list():
     try:
         # Perform the necessary database operation to fetch the session list
-        query = "SELECT session_id FROM session"
+        query = "SELECT session_id FROM movie_session"
         result = execute_query(query)
 
         # Transform the result into a list of session IDs
