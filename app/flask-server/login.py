@@ -15,7 +15,7 @@ def handle_login(user_name, password, role, connection):
     if role == 'manager':
         query = "SELECT * FROM database_managers WHERE user_name = %s AND manager_password = %s"
     elif role == 'director':
-        query = "SELECT * FROM directors WHERE user_name = %s AND director_password = %s"
+        query = "SELECT * FROM directors_agreements WHERE user_name = %s AND director_password = %s"
     elif role == 'audience':
         query = "SELECT * FROM audience WHERE user_name = %s AND audience_password = %s"
     else:

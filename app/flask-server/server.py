@@ -129,7 +129,7 @@ def add_director():
 
         # Perform the necessary database operation to add a new director
         # Insert the director data into the 'directors' table
-        query = "INSERT INTO directors (user_name, director_password, director_name, director_surname, " \
+        query = "INSERT INTO directors_agreements (user_name, director_password, director_name, director_surname, " \
                 "nationality, platform_id) VALUES (%s, %s, %s, %s, %s, %s)"
         args = (user_name, director_password, director_name, director_surname, nationality, platform_id)
         execute_query(query, args)
@@ -151,7 +151,7 @@ def change_director_platform():
 
         # Perform the necessary database operation to change the platform ID of a director
         # Update the platform_id of the director with the provided user_name in the 'directors' table
-        query = "UPDATE directors SET platform_id = %s WHERE user_name = %s"
+        query = "UPDATE directors_agreements SET platform_id = %s WHERE user_name = %s"
         args = (platform_id, user_name)
         execute_query(query, args)
 
@@ -168,7 +168,7 @@ def get_director_list():
         # Perform the necessary database operation to fetch the list of directors
         # Fetch all the director data from the 'directors' table
         query = "SELECT user_name, director_password, director_name, director_surname, nationality, platform_id " \
-                "FROM directors"
+                "FROM directors_agreements"
         result = execute_query(query)
 
         # Transform the result into a list of dictionaries
@@ -233,17 +233,19 @@ def search_movies():
 
         # Perform the necessary database operation to fetch the movies by director username
         # Fetch the movie_id, movie_name, theatre_id, district, and time_slot from the relevant tables
+        
         query = """
-            SELECT movies.movie_id, movies.movie_name, theatre.theatre_id, theatre.district, session.time_slot
-            FROM movies
-            JOIN directed_by ON movies.movie_id = directed_by.movie_id
-            JOIN movie_session ON movies.movie_id = movie_session.movie_id
-            JOIN session ON movie_session.session_id = session.session_id
-            JOIN session_locations ON session.session_id = session_locations.session_id
-            JOIN theatre ON session_locations.theatre_id = theatre.theatre_id
-            WHERE directed_by.user_name = %s
-            """
+            SELECT subquery.movie_id, subquery.movie_name, theatre.theatre_id, theatre.district, occupied_slots.time_slot
+            FROM (
+                SELECT movies.movie_id, movies.movie_name
+                FROM movies
+                WHERE movies.director_name = %s
+            ) AS subquery
+            JOIN movie_session ON subquery.movie_id = movie_session.movie_id
+            JOIN occupied_slots ON movie_session.session_id = occupied_slots.session_id
+            JOIN theatre ON theatre.theatre_id = occupied_slots.theatre_id;
 
+            """
 
         args = (user_name,)
         result = execute_query(query, args)
@@ -315,17 +317,9 @@ def get_theatres_for_slot():
 
         # Perform the necessary database operation to fetch the theaters available for a given slot
         query = """
-            SELECT theatre_id, district, capacity
-            FROM theatre
-            WHERE theatre_id IN (
-                SELECT theatre_id
-                FROM session_locations
-                WHERE session_id IN (
-                    SELECT session_id
-                    FROM session
-                    WHERE time_slot = %s
-                )
-            )
+                SELECT t.theatre_id, t.district, t.capacity FROM theatre t
+                WHERE NOT t.theatre_id IN 
+                (SELECT o.theatre_id FROM occupied_slots o WHERE o.time_slot = %s) 
             """
         args = (time_slot,)
         result = execute_query(query, args)
@@ -410,34 +404,24 @@ def add_movie():
         
         # Perform the necessary database operation to add a new movie
         # Insert the movie data into the 'movies' table
-        query = "INSERT INTO movies (movie_id, movie_name) VALUES (%s, %s)"
-        args = (movie_id, movie_name)
+        query = "INSERT INTO movies (movie_id, movie_name, director_name) VALUES (%s, %s, %s)"
+        args = (movie_id, movie_name, user_name)
         execute_query(query, args)
 
         # Get the platform_id of the director
-        query = "SELECT platform_id FROM directors WHERE user_name = %s"
+        query = "SELECT platform_id FROM directors_agreements WHERE user_name = %s"
         args = (user_name,)
         result = execute_query(query, args)
         platform_id = result[0][0]
 
         # Insert new session
-        query = "INSERT INTO session (session_id, session_date, time_slot) VALUES (%s, %s)"
-        args = (session_id, time_slot)
-        execute_query(query, args)
-
-        # Link the new session to the movie
-        query = "INSERT INTO movie_session (movie_id, session_id) VALUES (%s, %s)"
-        args = (movie_id, session_id)
+        query = "INSERT INTO movie_session (session_id, movie_id) VALUES (%s, %s)"
+        args = (session_id, movie_id)
         execute_query(query, args)
 
         # Link the new session to the theatre
-        query = "INSERT INTO session_locations (theatre_id, session_id) VALUES (%s, %s)"
-        args = (theatre_id, session_id)
-        execute_query(query, args)
-
-        # Link the new movie to the director
-        query = "INSERT INTO directed_by (movie_id, user_name) VALUES (%s, %s)"
-        args = (movie_id, user_name)
+        query = "INSERT INTO occupied_slots (theatre_id, session_id, session_date, time_slot) VALUES (%s, %s, %s, %s)"
+        args = (theatre_id, session_id, session_date, time_slot)
         execute_query(query, args)
 
         # Return a success response
