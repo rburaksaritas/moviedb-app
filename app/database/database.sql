@@ -268,3 +268,28 @@ BEGIN
 END$$
 DELIMITER ;
 
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS check_predecessor $$
+
+CREATE TRIGGER check_predecessor
+BEFORE INSERT 
+ON tickets FOR EACH ROW
+BEGIN
+    DECLARE mov_id VARCHAR(50);
+    DECLARE unwatched INT;
+    SELECT movie_id INTO mov_id FROM movie_session WHERE session_id=new.session_id;
+    
+    SELECT COUNT(*) INTO unwatched FROM (SELECT predecessor_id FROM movie_predecessors WHERE successor_id=mov_id
+    EXCEPT
+    SELECT ms.movie_id FROM movie_session ms WHERE ms.session_id IN (SELECT session_id FROM tickets WHERE user_id = new.user_id));
+    ;
+
+    IF unwatched > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Watch predecessors first!';
+
+
+
+END$$
+DELIMITER ;
+
