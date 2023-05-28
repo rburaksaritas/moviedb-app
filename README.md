@@ -26,7 +26,7 @@ The project follows a specific structure to organize the codebase:
 Before getting started, make sure you have the following dependencies installed:
 
 - Python (version 3.X.X)
-- Node.js (version 8.19.X)
+- Node.js (version 16.20.0)
 - MySQL (version 8.0.X)
 
 ## Installation
