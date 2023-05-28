@@ -120,14 +120,63 @@ VALUES
     ('50008', '40004', '16.03.2023', 3),
     ('50009', '40005', '16.03.2023', 1);
 
+-- Insert tickets
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100001', 'steven.jobs', '50001');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100002', 'steven.jobs', '50001');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100003', 'steve.wozniak', '50004');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100004', 'steve.wozniak', '50005');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100005', 'arzucan.ozgur', '50006');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100006', 'egemen.isguder', '50008');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100007', 'egemen.isguder', '50004');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100008', 'egemen.isguder', '50007');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100009', 'egemen.isguder', '50001');
+
+INSERT INTO tickets (ticket_id, user_name, session_id)
+VALUES
+('100010', 'busra.oguzoglu', '50009');
+
+
 -- Insert ratings
 INSERT INTO ratings (movie_id, user_name, rating)
-VALUES
-    ('20001', 'egemen.isguder', 5),
-    ('20005', 'egemen.isguder', 5),
-    ('20006', 'egemen.isguder', 5),
-    ('20004', 'arzucan.ozgur', 5),
-    ('20007', 'busra.oguzoglu', 5);
+VALUES ('20001', 'egemen.isguder', 5);
+
+INSERT INTO ratings (movie_id, user_name, rating)
+VALUES ('20005', 'egemen.isguder', 5);
+
+INSERT INTO ratings (movie_id, user_name, rating)
+VALUES ('20006', 'egemen.isguder', 5);
+
+INSERT INTO ratings (movie_id, user_name, rating)
+VALUES ('20004', 'arzucan.ozgur', 5);
+
+INSERT INTO ratings (movie_id, user_name, rating)
+VALUES ('20007', 'busra.oguzoglu', 5);
 
 -- Insert managers
 INSERT INTO database_managers (user_name, manager_password)
