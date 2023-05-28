@@ -1,79 +1,137 @@
--- Inserting data into rating_platforms table
+-- Insert rating platforms
 INSERT INTO rating_platforms (platform_id, platform_name)
 VALUES
-    ('P1', 'Platform A'),
-    ('P2', 'Platform B');
+    ('10130', 'IMDB'),
+    ('10131', 'Letterboxd'),
+    ('10132', 'FilmIzle'),
+    ('10133', 'Filmora'),
+    ('10134', 'BollywoodMDB');
 
--- Inserting data into directors_agreements table
+-- Insert directors agreements
 INSERT INTO directors_agreements (user_name, director_password, director_name, director_surname, nationality, platform_id)
 VALUES
-    ('director1', 'password1', 'John', 'Doe', 'USA', 'P1'),
-    ('director2', 'password2', 'Jane', 'Smith', 'UK', 'P2');
+    ('he.gongmin', 'passwordpass', 'He', 'Gongmin', 'Turkish', '10130'),
+    ('carm.galian', 'madrid9897', 'Carmelita', 'Galiano', 'Turkish', '10131'),
+    ('kron.helene', 'helenepass', 'Helene', 'Kron', 'French', '10130'),
+    ('peter.weir', 'peter_weir879', 'Peter', 'Weir', 'Spanish', '10131'),
+    ('kyle.balda', 'mynameiskyle9', 'Kyle', 'Balda', 'German', '10132');
 
--- Inserting data into audience table
+-- Insert audience
 INSERT INTO audience (user_name, audience_password, audience_name, audience_surname)
 VALUES
-    ('audience1', 'password3', 'Alice', 'Johnson'),
-    ('audience2', 'password4', 'Bob', 'Williams');
+    ('steven.jobs', 'apple123', 'Steven', 'Jobs'),
+    ('minion.lover', 'bello387', 'Felonius', 'Gru'),
+    ('steve.wozniak', 'pass4321', 'Ryan', 'Andrews'),
+    ('he.gongmin', 'passwordpass', 'He', 'Gongmin'),
+    ('carm.galian', 'madrid9897', 'Carmelita', 'Galiano'),
+    ('kron.helene', 'helenepass', 'Helene', 'Kron'),
+    ('arzucan.ozgur', 'deneme123', 'Arzucan', 'Ozgur'),
+    ('egemen.isguder', 'deneme124', 'Egemen', 'Isguder'),
+    ('busra.oguzoglu', 'deneme125', 'Busra', 'Oguzoglu'),
+    ('peter.weir', 'peter_weir879', 'Peter', 'Weir'),
+    ('kyle.balda', 'mynameiskyle9', 'Kyle', 'Balda');
 
--- Inserting data into subscribes table
+-- Insert subscribes
 INSERT INTO subscribes (user_name, platform_id)
 VALUES
-    ('audience1', 'P1'),
-    ('audience2', 'P2');
+    ('steven.jobs', '10130'),
+    ('steven.jobs', '10131'),
+    ('steve.wozniak', '10131'),
+    ('arzucan.ozgur', '10130'),
+    ('egemen.isguder', '10132'),
+    ('busra.oguzoglu', '10131');
 
--- Inserting data into movies table
+-- Insert movies
 INSERT INTO movies (movie_id, movie_name, director_name, duration, average_rating)
 VALUES
-    ('M1', 'Movie 1', 'director1', 2, 0),
-    ('M2', 'Movie 2', 'director2', 1, 0);
+    ('20001', 'Despicable Me 2', 'kyle.balda', 2, 5),
+    ('20002', 'Catch Me If You Can', 'he.gongmin', 2, NULL),
+    ('20003', 'The Bone Collector', 'carm.galian', 2, NULL),
+    ('20004', 'Eagle Eye', 'kron.helene', 2, 5),
+    ('20005', 'Minions: The Rise Of Gru', 'kyle.balda', 1, 5),
+    ('20006', 'The Minions', 'kyle.balda', 1, 5),
+    ('20007', 'The Truman Show', 'peter.weir', 3, 5);
 
--- Inserting data into movie_predecessors table
+-- Insert movie predecessors
 INSERT INTO movie_predecessors (successor_id, predecessor_id)
 VALUES
-    ('M2', 'M1');
+    ('20001', '20006'),
+    ('20007', '20001');
 
--- Inserting data into genres table
+-- Insert genres
 INSERT INTO genres (genre_id, genre_name)
 VALUES
-    ('G1', 'Action'),
-    ('G2', 'Drama');
+    ('80001', 'Animation'),
+    ('80002', 'Comedy'),
+    ('80003', 'Adventure'),
+    ('80004', 'Real Story'),
+    ('80005', 'Thriller'),
+    ('80006', 'Drama');
 
--- Inserting data into movie_genres table
+-- Insert movie genres
 INSERT INTO movie_genres (movie_id, genre_id)
 VALUES
-    ('M1', 'G1'),
-    ('M2', 'G2');
+    ('20001', '80001'),
+    ('20001', '80002'),
+    ('20002', '80003'),
+    ('20002', '80004'),
+    ('20003', '80005'),
+    ('20004', '80003'),
+    ('20004', '80006'),
+    ('20005', '80001'),
+    ('20005', '80002'),
+    ('20006', '80001'),
+    ('20006', '80002'),
+    ('20007', '80002'),
+    ('20007', '80006');
 
--- Inserting data into theatre table
+-- Insert theatre
 INSERT INTO theatre (theatre_id, theatre_name, capacity, district)
 VALUES
-    ('T1', 'Theatre A', 100, 'District X'),
-    ('T2', 'Theatre B', 150, 'District Y');
+    ('40001', 'Sisli_1', 300, 'Sisli'),
+    ('40002', 'Sisli_2', 200, 'Sisli'),
+    ('40003', 'Besiktas1', 100, 'Besiktas'),
+    ('40004', 'Besiktas2', 100, 'Besiktas'),
+    ('40005', 'Besiktas3', 500, 'Besiktas');
 
--- Inserting data into movie_session table
+-- Insert movie sessions
 INSERT INTO movie_session (session_id, movie_id)
 VALUES
-    ('S1', 'M1'),
-    ('S2', 'M2');
+    ('50001', '20001'),
+    ('50002', '20001'),
+    ('50003', '20001'),
+    ('50004', '20002'),
+    ('50005', '20003'),
+    ('50006', '20004'),
+    ('50007', '20005'),
+    ('50008', '20006'),
+    ('50009', '20007');
 
--- Inserting data into occupied_slots table
+-- Insert occupied slots
 INSERT INTO occupied_slots (session_id, theatre_id, session_date, time_slot)
 VALUES
-    ('S1', 'T1', '2023-05-30', 1),
-    ('S2', 'T2', '2023-05-31', 2);
+    ('50001', '40001', '15.03.2023', 1),
+    ('50002', '40001', '15.03.2023', 3),
+    ('50003', '40002', '15.03.2023', 1),
+    ('50004', '40002', '15.03.2023', 3),
+    ('50005', '40003', '16.03.2023', 1),
+    ('50006', '40003', '16.03.2023', 3),
+    ('50007', '40004', '16.03.2023', 1),
+    ('50008', '40004', '16.03.2023', 3),
+    ('50009', '40005', '16.03.2023', 1);
 
--- Inserting data into tickets table
-INSERT INTO tickets (ticket_id, user_name, session_id)
-VALUES
-    ('TICKET1', 'audience1', 'S1');
-
--- Inserting data into ratings table
+-- Insert ratings
 INSERT INTO ratings (movie_id, user_name, rating)
 VALUES
-    ('M1', 'audience1', 4);
+    ('20001', 'egemen.isguder', 5),
+    ('20005', 'egemen.isguder', 5),
+    ('20006', 'egemen.isguder', 5),
+    ('20004', 'arzucan.ozgur', 5),
+    ('20007', 'busra.oguzoglu', 5);
 
--- Inserting data into database_managers table
+-- Insert managers
 INSERT INTO database_managers (user_name, manager_password)
 VALUES
-    ('manager1', 'managerpassword1');
+    ('manager1', 'managerpass1'),
+    ('manager2', 'managerpass2'),
+    ('manager35', 'managerpass35');
