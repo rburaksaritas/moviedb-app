@@ -79,8 +79,8 @@ function AudienceDashboard({ currentUser }) {
             })
             .then((data) => {
                 console.log('Buy Ticket Response:', data);
-                fetchTicketsList();
                 // Refresh the tickets list
+                fetchTicketsList();
                 setSelectedSession('');
             })
             .catch((error) => {
