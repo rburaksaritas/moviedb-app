@@ -25,8 +25,8 @@ VALUES
 -- Inserting data into movies table
 INSERT INTO movies (movie_id, movie_name, director_name, duration, average_rating)
 VALUES
-    ('M1', 'Movie 1', 'director1', 120, 0),
-    ('M2', 'Movie 2', 'director2', 90, 0);
+    ('M1', 'Movie 1', 'director1', 2, 0),
+    ('M2', 'Movie 2', 'director2', 1, 0);
 
 -- Inserting data into movie_predecessors table
 INSERT INTO movie_predecessors (successor_id, predecessor_id)
@@ -66,17 +66,13 @@ VALUES
 -- Inserting data into tickets table
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-    ('TICKET1', 'audience1', 'S1'),
-    ('TICKET2', 'audience2', 'S2');
+    ('TICKET1', 'audience1', 'S1');
 
 -- Inserting data into ratings table
 INSERT INTO ratings (movie_id, user_name, rating)
 VALUES
-    ('M1', 'audience1', 4),
-    ('M1', 'audience2', 3),
-    ('M2', 'audience1', 5),
-    ('M2', 'audience2', 4);
-    
+    ('M1', 'audience1', 4);
+
 -- Inserting data into database_managers table
 INSERT INTO database_managers (user_name, manager_password)
 VALUES
