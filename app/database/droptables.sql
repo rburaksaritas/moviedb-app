@@ -1,5 +1,3 @@
--- Dropping tables in reverse order to avoid foreign key constraint violations
-
 -- Drop triggers
 DROP TRIGGER IF EXISTS platform_consistency;
 DROP TRIGGER IF EXISTS ticket_rate_consistency;
