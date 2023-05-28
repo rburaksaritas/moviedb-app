@@ -223,8 +223,8 @@ function Directordashboard({ currentUser }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {moviesList.map((movie) => (
-                            <tr key={movie.movie_id}>
+                        {moviesList.map((movie, index) => (
+                            <tr key={index}>
                                 <td>{movie.movie_id}</td>
                                 <td>{movie.movie_name}</td>
                                 <td>{movie.theatre_id}</td>
