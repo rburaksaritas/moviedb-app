@@ -1,5 +1,6 @@
--- Creating tables:
--- User entity is not created since directors and audience cover users.
+-- Create DATABASE and use it:
+CREATE DATABASE moviedb;
+USE moviedb;
 SET SQL_SAFE_UPDATES = 1;
 
 CREATE TABLE rating_platforms(
@@ -26,7 +27,6 @@ CREATE TABLE audience(
     audience_surname VARCHAR(100) NOT NULL,
     PRIMARY KEY (user_name)
 );
-
 
 CREATE TABLE subscribes(
 	user_name VARCHAR(100) NOT NULL,
@@ -175,7 +175,7 @@ BEGIN
     INTO movie_platform;
     
     IF NOT (movie_platform IN (SELECT platform_id FROM subscribes WHERE user_name = new.user_name)) THEN
-    signal sqlstate '45000' set message_text = "TriggerError: platform mismatch: user cannot rate the movie";
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TriggerError: platform mismatch: user cannot rate the movie';
     END IF;
 
 END $$
@@ -192,7 +192,7 @@ BEGIN
     
     IF NOT (new.movie_id IN (SELECT movie_id FROM movie_session WHERE session_id IN 
     (SELECT session_id FROM tickets WHERE user_name = new.user_name))) THEN
-    signal sqlstate '45000' set message_text = "TriggerError: ticket mismatch: user cannot rate the movie";
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TriggerError: ticket mismatch: user cannot rate the movie';
     END IF;
 	
 END $$
