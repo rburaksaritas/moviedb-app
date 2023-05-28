@@ -405,7 +405,7 @@ function Managerdashboard({ currentUser }) {
     };
 
     const renderAverageRating = () => {
-        if (averageRating) {
+        if (Array.isArray(averageRating) && averageRating.length > 0) {
             return (
                 <table>
                     <thead>

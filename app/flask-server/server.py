@@ -9,12 +9,16 @@ app = Flask(__name__)
 def execute_query(query, args=None):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
-    cursor.execute(query, args)
-    result = cursor.fetchall()
-    connection.commit()
-    cursor.close()
-    connection.close()
-    return result
+    try:
+        cursor.execute(query, args)
+        result = cursor.fetchall()
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return result
+    except mysql.connector.Error as error:
+        print(error)
+        return {"error": str(error)}
 
 # Login route
 @app.route("/login", methods=["POST"])
@@ -129,7 +133,7 @@ def add_director():
 
         # Perform the necessary database operation to add a new director
         # Insert the director data into the 'directors' table
-        query = "INSERT INTO directors (user_name, director_password, director_name, director_surname, " \
+        query = "INSERT INTO directors_agreements (user_name, director_password, director_name, director_surname, " \
                 "nationality, platform_id) VALUES (%s, %s, %s, %s, %s, %s)"
         args = (user_name, director_password, director_name, director_surname, nationality, platform_id)
         execute_query(query, args)
@@ -151,7 +155,7 @@ def change_director_platform():
 
         # Perform the necessary database operation to change the platform ID of a director
         # Update the platform_id of the director with the provided user_name in the 'directors' table
-        query = "UPDATE directors SET platform_id = %s WHERE user_name = %s"
+        query = "UPDATE directors_agreements SET platform_id = %s WHERE user_name = %s"
         args = (platform_id, user_name)
         execute_query(query, args)
 
@@ -168,7 +172,7 @@ def get_director_list():
         # Perform the necessary database operation to fetch the list of directors
         # Fetch all the director data from the 'directors' table
         query = "SELECT user_name, director_password, director_name, director_surname, nationality, platform_id " \
-                "FROM directors"
+                "FROM directors_agreements"
         result = execute_query(query)
 
         # Transform the result into a list of dictionaries
@@ -233,17 +237,19 @@ def search_movies():
 
         # Perform the necessary database operation to fetch the movies by director username
         # Fetch the movie_id, movie_name, theatre_id, district, and time_slot from the relevant tables
+        
         query = """
-            SELECT movies.movie_id, movies.movie_name, theatre.theatre_id, theatre.district, session.time_slot
-            FROM movies
-            JOIN directed_by ON movies.movie_id = directed_by.movie_id
-            JOIN movie_session ON movies.movie_id = movie_session.movie_id
-            JOIN session ON movie_session.session_id = session.session_id
-            JOIN session_locations ON session.session_id = session_locations.session_id
-            JOIN theatre ON session_locations.theatre_id = theatre.theatre_id
-            WHERE directed_by.user_name = %s
-            """
+            SELECT subquery.movie_id, subquery.movie_name, theatre.theatre_id, theatre.district, occupied_slots.time_slot
+            FROM (
+                SELECT movies.movie_id, movies.movie_name
+                FROM movies
+                WHERE movies.director_name = %s
+            ) AS subquery
+            JOIN movie_session ON subquery.movie_id = movie_session.movie_id
+            JOIN occupied_slots ON movie_session.session_id = occupied_slots.session_id
+            JOIN theatre ON theatre.theatre_id = occupied_slots.theatre_id;
 
+            """
 
         args = (user_name,)
         result = execute_query(query, args)
@@ -311,21 +317,13 @@ def get_movie_rating():
 def get_theatres_for_slot():
     try:
         # Get the time_slot from the request parameters
-        time_slot = request.args.get('time_slot')
+        time_slot = int(request.args.get('time_slot'))
 
         # Perform the necessary database operation to fetch the theaters available for a given slot
         query = """
-            SELECT theatre_id, district, capacity
-            FROM theatre
-            WHERE theatre_id IN (
-                SELECT theatre_id
-                FROM session_locations
-                WHERE session_id IN (
-                    SELECT session_id
-                    FROM session
-                    WHERE time_slot = %s
-                )
-            )
+                SELECT t.theatre_id, t.district, t.capacity FROM theatre t
+                WHERE NOT t.theatre_id IN 
+                (SELECT o.theatre_id FROM occupied_slots o WHERE o.time_slot = %s) 
             """
         args = (time_slot,)
         result = execute_query(query, args)
@@ -357,20 +355,19 @@ def get_director_movies():
 
         # Perform the necessary database operation to fetch the movies directed by the given director
         query = """
-            SELECT movies.movie_id, movies.movie_name, session_locations.theatre_id, session.time_slot,
-                GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
+        SELECT m.movie_id, m.movie_name, os.theatre_id, os.time_slot,
+            IFNULL(GROUP_CONCAT(mp.predecessor_id SEPARATOR ', '), 'None') AS predecessors
+        FROM movies m
+        LEFT JOIN movie_predecessors mp ON m.movie_id = mp.successor_id
+        LEFT JOIN movie_session ms ON m.movie_id = ms.movie_id
+        LEFT JOIN occupied_slots os ON ms.session_id = os.session_id
+        WHERE m.movie_id IN (
+            SELECT movie_id
             FROM movies
-            LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
-            LEFT JOIN movie_session ON movies.movie_id = movie_session.movie_id
-            LEFT JOIN session ON movie_session.session_id = session.session_id
-            LEFT JOIN session_locations ON session_locations.session_id = session.session_id
-            WHERE movies.movie_id IN (
-                SELECT movie_id
-                FROM directed_by
-                WHERE user_name = %s
-            )
-            GROUP BY movies.movie_id, movies.movie_name, session_locations.theatre_id, session.time_slot
-            ORDER BY movies.movie_id ASC
+            WHERE director_name = %s
+        )
+        GROUP BY m.movie_id, m.movie_name, os.theatre_id, os.time_slot
+        ORDER BY m.movie_id ASC
             """
         args = (user_name,)
         result = execute_query(query, args)
@@ -404,41 +401,35 @@ def add_movie():
         movie_name = data.get('movie_name')
         user_name = data.get('user_name') # director's username
         theatre_id = data.get('theatre_id')
-        time_slot = data.get('time_slot')
+        time_slot = int(data.get('time_slot'))
+        duration = int(data.get('duration'))
         session_id = data.get('session_id') # new session id provided by director
         session_date = data.get('session_date') # new session time provided by director
         
         # Perform the necessary database operation to add a new movie
         # Insert the movie data into the 'movies' table
-        query = "INSERT INTO movies (movie_id, movie_name) VALUES (%s, %s)"
-        args = (movie_id, movie_name)
+        if int(time_slot)+int(duration)>5:
+            return "Invalid time slot or duration"
+        query = "INSERT INTO movies (movie_id, movie_name, director_name, duration) VALUES (%s, %s, %s, %s)"
+        args = (movie_id, movie_name, user_name, duration)
         execute_query(query, args)
-
+    
         # Get the platform_id of the director
-        query = "SELECT platform_id FROM directors WHERE user_name = %s"
+        query = "SELECT platform_id FROM directors_agreements WHERE user_name = %s"
         args = (user_name,)
         result = execute_query(query, args)
         platform_id = result[0][0]
 
         # Insert new session
-        query = "INSERT INTO session (session_id, session_date, time_slot) VALUES (%s, %s)"
-        args = (session_id, time_slot)
+        query = "INSERT INTO movie_session (session_id, movie_id) VALUES (%s, %s)"
+        args = (session_id, movie_id)
         execute_query(query, args)
 
-        # Link the new session to the movie
-        query = "INSERT INTO movie_session (movie_id, session_id) VALUES (%s, %s)"
-        args = (movie_id, session_id)
-        execute_query(query, args)
-
-        # Link the new session to the theatre
-        query = "INSERT INTO session_locations (theatre_id, session_id) VALUES (%s, %s)"
-        args = (theatre_id, session_id)
-        execute_query(query, args)
-
-        # Link the new movie to the director
-        query = "INSERT INTO directed_by (movie_id, user_name) VALUES (%s, %s)"
-        args = (movie_id, user_name)
-        execute_query(query, args)
+        # Link the new session to the theatre and time
+        for i in range(int(duration)):
+            query = "INSERT INTO occupied_slots (theatre_id, session_id, session_date, time_slot) VALUES (%s, %s, %s, %s)"
+            args = (theatre_id, session_id, session_date, i+int(time_slot))
+            execute_query(query, args)
 
         # Return a success response
         return {"status": "success", "message": "Movie added successfully"}
@@ -499,11 +490,14 @@ def get_audience_list_for_movie():
         # Perform the necessary database operation to fetch the audience who bought tickets for the given movie
         query = """
             SELECT audience.user_name, audience.audience_name, audience.audience_surname
-            FROM audience
-            INNER JOIN tickets ON audience.user_name = tickets.user_name
-            INNER JOIN movie_session ON tickets.session_id = movie_session.session_id
-            WHERE movie_session.movie_id = %s
+            FROM audience WHERE audience.user_name IN 
+            (
+                SELECT tickets.user_name FROM tickets WHERE tickets.session_id IN
+                (SELECT m.session_id FROM movie_session m WHERE m.movie_id = %s)
+            )
             """
+        
+
         args = (movie_id,)
         result = execute_query(query, args)
 
@@ -531,19 +525,32 @@ def get_audience_list_for_movie():
 def get_movies_list():
     try:
         # Perform the necessary database operation to fetch the movies list
+        
         query = """
-        SELECT movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
-               session_locations.theatre_id, session.time_slot, GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
-        FROM movies
-        JOIN directed_by ON movies.movie_id = directed_by.movie_id
-        JOIN directors ON directed_by.user_name = directors.user_name
-        JOIN rating_platforms ON directors.platform_id = rating_platforms.platform_id
-        JOIN movie_session ON movies.movie_id = movie_session.movie_id
-        JOIN session ON movie_session.session_id = session.session_id
-        JOIN session_locations ON session_locations.session_id = session.session_id
-        LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
-        GROUP BY movies.movie_id, movies.movie_name, directors.director_surname, rating_platforms.platform_name, 
-                 session_locations.theatre_id, session.time_slot
+        SELECT
+            m.movie_id,
+            m.movie_name,
+            da.director_surname,
+            rp.platform_name,
+            os.theatre_id,
+            os.time_slot,
+            IFNULL(mp.predecessors, 'None') AS predecessors
+        FROM
+            movies m
+            JOIN directors_agreements da ON m.director_name = da.user_name
+            JOIN rating_platforms rp ON da.platform_id = rp.platform_id
+            JOIN movie_session ms ON m.movie_id = ms.movie_id
+            JOIN occupied_slots os ON ms.session_id = os.session_id
+            LEFT JOIN (
+                SELECT
+                    successor_id,
+                    GROUP_CONCAT(predecessor_id SEPARATOR ', ') AS predecessors
+                FROM
+                    movie_predecessors
+                GROUP BY
+                    successor_id
+            ) mp ON m.movie_id = mp.successor_id;
+
         """
         result = execute_query(query)
 
@@ -574,7 +581,7 @@ def get_movies_list():
 def get_session_list():
     try:
         # Perform the necessary database operation to fetch the session list
-        query = "SELECT session_id FROM session"
+        query = "SELECT session_id FROM movie_session"
         result = execute_query(query)
 
         # Transform the result into a list of session IDs
