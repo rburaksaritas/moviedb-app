@@ -9,12 +9,22 @@ app = Flask(__name__)
 def execute_query(query, args=None):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
-    cursor.execute(query, args)
-    result = cursor.fetchall()
-    connection.commit()
-    cursor.close()
-    connection.close()
-    return result
+    print("bello4.1")
+    try:
+        cursor.execute(query, args)
+        print("bello4.2")
+        result = cursor.fetchall()
+        print("bello4.3")
+        connection.commit()
+        print("bello4.4")
+        cursor.close()
+        print("bello4.5")
+        connection.close()
+        print("bello4.6")
+        return result
+    except mysql.connector.Error as error:
+        print("Error:", error)
+        raise
 
 # Login route
 @app.route("/login", methods=["POST"])
@@ -613,7 +623,9 @@ def get_tickets_list():
             tickets.user_name = %s
             """
         args = (user_name,)
+        print("bello1")
         result = execute_query(query, args)
+        print("bello2")
 
         # Transform the result into a list of dictionaries
         tickets_list = []
@@ -629,8 +641,8 @@ def get_tickets_list():
             tickets_list.append(ticket)
 
         # Return the tickets list as a JSON response
+        print("bello3")
         return jsonify(tickets_list)
-
     except mysql.connector.Error as error:
         return {"error": str(error)}
 
@@ -646,12 +658,12 @@ def buy_ticket():
 
         # Generate a random ticket_id
         ticket_id = str(uuid.uuid4())
-
+        print("bello4")
         # Perform the necessary database operation to buy a ticket
         query = "INSERT INTO tickets (ticket_id, user_name, session_id) VALUES (%s, %s, %s)"
         args = (ticket_id, user_name, session_id)
         execute_query(query, args)
-
+        print("bello5")
         # Return a success response
         return {"status": "success", "message": "Ticket bought successfully"}
 
