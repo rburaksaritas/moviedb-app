@@ -351,19 +351,19 @@ def get_director_movies():
 
         # Perform the necessary database operation to fetch the movies directed by the given director
         query = """
-            SELECT m.movie_id, m.movie_name, os.theatre_id, os.time_slot, 
-                IFNULL(GROUP_CONCAT(mp.predecessor_id SEPARATOR ', '), 'None') AS predecessors
-            FROM movies m
-            LEFT JOIN movie_predecessors mp ON m.movie_id = mp.successor_id
-            LEFT JOIN movie_session ms ON m.movie_id = ms.movie_id
-            LEFT JOIN occupied_slots os ON ms.session_id = os.session_id
-            WHERE m.movie_id IN (
-                SELECT movie_id
-                FROM directed_by
-                WHERE user_name = %s
-            )
-            GROUP BY m.movie_id, m.movie_name, ms.theatre_id, os.time_slot
-            ORDER BY m.movie_id ASC
+        SELECT m.movie_id, m.movie_name, os.theatre_id, os.time_slot,
+            IFNULL(GROUP_CONCAT(mp.predecessor_id SEPARATOR ', '), 'None') AS predecessors
+        FROM movies m
+        LEFT JOIN movie_predecessors mp ON m.movie_id = mp.successor_id
+        LEFT JOIN movie_session ms ON m.movie_id = ms.movie_id
+        LEFT JOIN occupied_slots os ON ms.session_id = os.session_id
+        WHERE m.movie_id IN (
+            SELECT movie_id
+            FROM movies
+            WHERE director_name = %s
+        )
+        GROUP BY m.movie_id, m.movie_name, os.theatre_id, os.time_slot
+        ORDER BY m.movie_id ASC
             """
         args = (user_name,)
         result = execute_query(query, args)
