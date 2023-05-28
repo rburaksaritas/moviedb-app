@@ -313,7 +313,7 @@ def get_movie_rating():
 def get_theatres_for_slot():
     try:
         # Get the time_slot from the request parameters
-        time_slot = request.args.get('time_slot')
+        time_slot = int(request.args.get('time_slot'))
 
         # Perform the necessary database operation to fetch the theaters available for a given slot
         query = """
@@ -398,16 +398,19 @@ def add_movie():
         movie_name = data.get('movie_name')
         user_name = data.get('user_name') # director's username
         theatre_id = data.get('theatre_id')
-        time_slot = data.get('time_slot')
+        time_slot = int(data.get('time_slot'))
+        duration = int(data.get('duration'))
         session_id = data.get('session_id') # new session id provided by director
         session_date = data.get('session_date') # new session time provided by director
         
         # Perform the necessary database operation to add a new movie
         # Insert the movie data into the 'movies' table
-        query = "INSERT INTO movies (movie_id, movie_name, director_name) VALUES (%s, %s, %s)"
-        args = (movie_id, movie_name, user_name)
+        if int(time_slot)+int(duration)>5:
+            return "Invalid time slot or duration"
+        query = "INSERT INTO movies (movie_id, movie_name, director_name, duration) VALUES (%s, %s, %s, %s)"
+        args = (movie_id, movie_name, user_name, duration)
         execute_query(query, args)
-
+    
         # Get the platform_id of the director
         query = "SELECT platform_id FROM directors_agreements WHERE user_name = %s"
         args = (user_name,)
@@ -419,10 +422,11 @@ def add_movie():
         args = (session_id, movie_id)
         execute_query(query, args)
 
-        # Link the new session to the theatre
-        query = "INSERT INTO occupied_slots (theatre_id, session_id, session_date, time_slot) VALUES (%s, %s, %s, %s)"
-        args = (theatre_id, session_id, session_date, time_slot)
-        execute_query(query, args)
+        # Link the new session to the theatre and time
+        for i in range(int(duration)):
+            query = "INSERT INTO occupied_slots (theatre_id, session_id, session_date, time_slot) VALUES (%s, %s, %s, %s)"
+            args = (theatre_id, session_id, session_date, i+int(time_slot))
+            execute_query(query, args)
 
         # Return a success response
         return {"status": "success", "message": "Movie added successfully"}

@@ -75,14 +75,14 @@ CREATE TABLE directed_by(
 */
 
 CREATE TABLE genres(
-	genre_id INT UNSIGNED AUTO_INCREMENT,
+	genre_id VARCHAR(50),
     genre_name VARCHAR(100) UNIQUE,
     PRIMARY KEY (genre_id)
 );
 
 CREATE TABLE movie_genres(
 	movie_id VARCHAR(50) NOT NULL,
-	genre_id INT UNSIGNED,
+	genre_id VARCHAR(50),
     FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (genre_id) REFERENCES genres(genre_id) ON DELETE CASCADE ON UPDATE CASCADE,
     PRIMARY KEY (genre_id, movie_id)
@@ -127,6 +127,7 @@ CREATE TABLE occupied_slots(
     
     FOREIGN KEY (theatre_id) REFERENCES theatre(theatre_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (session_id) REFERENCES movie_session(session_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CHECK (time_slot >= 1 AND time_slot <= 4),
 
     --No two movie sessions can overlap in terms of theatre and the time it’s screened.
     PRIMARY KEY (theatre_id, session_date, time_slot)
@@ -144,7 +145,7 @@ CREATE TABLE session_locations(
 */
 
 CREATE TABLE tickets(
-	ticket_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+	ticket_id VARCHAR(50) NOT NULL,
 	user_name VARCHAR(100) NOT NULL,
     session_id VARCHAR(50) NOT NULL,
     UNIQUE(user_name,session_id),
