@@ -51,7 +51,7 @@ CREATE TABLE ratings(
     user_name VARCHAR(100) NOT NULL,
     FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (user_name) REFERENCES audience(user_name) ON DELETE CASCADE ON UPDATE CASCADE,
-    rating FLOAT NOT NULL;
+    rating FLOAT NOT NULL,
     CHECK (rating >= 0 AND rating <= 5),
     PRIMARY KEY (movie_id, user_name)  -- A user can rate the same movie only once.
 );
@@ -108,13 +108,12 @@ CREATE TABLE theatre(
 CREATE TABLE movie_session(
     session_id VARCHAR(50) NOT NULL,
 	movie_id VARCHAR(50) NOT NULL,
-	--theatre_id VARCHAR(50) NOT NULL,
-    --session_date VARCHAR(50) NOT NULL,
-	--time_slot INTEGER NOT NULL,
+	-- theatre_id VARCHAR(50) NOT NULL,
+    -- session_date VARCHAR(50) NOT NULL,
+	-- time_slot INTEGER NOT NULL,
     
     FOREIGN KEY (movie_id) REFERENCES movies(movie_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (theatre_id) REFERENCES theatre(theatre_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    
+
     PRIMARY KEY (session_id) -- A session can have at most one movie
 );
 
@@ -129,10 +128,10 @@ CREATE TABLE occupied_slots(
     FOREIGN KEY (session_id) REFERENCES movie_session(session_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK (time_slot >= 1 AND time_slot <= 4),
 
-    --No two movie sessions can overlap in terms of theatre and the time it’s screened.
+    -- No two movie sessions can overlap in terms of theatre and the time it’s screened.
     PRIMARY KEY (theatre_id, session_date, time_slot)
 
-)
+);
 
 /*
 CREATE TABLE session_locations(
@@ -272,25 +271,25 @@ DELIMITER ;
 
 DELIMITER $$
 DROP TRIGGER IF EXISTS check_predecessor $$
-
 CREATE TRIGGER check_predecessor
-BEFORE INSERT 
-ON tickets FOR EACH ROW
+BEFORE INSERT ON tickets
+FOR EACH ROW
 BEGIN
     DECLARE mov_id VARCHAR(50);
     DECLARE unwatched INT;
-    SELECT movie_id INTO mov_id FROM movie_session WHERE session_id=new.session_id;
     
-    SELECT COUNT(*) INTO unwatched FROM (SELECT predecessor_id FROM movie_predecessors WHERE successor_id=mov_id
-    EXCEPT
-    SELECT ms.movie_id FROM movie_session ms WHERE ms.session_id IN (SELECT session_id FROM tickets WHERE user_id = new.user_id));
-    ;
-
+    SELECT movie_id INTO mov_id FROM movie_session WHERE session_id = new.session_id;
+    
+    SELECT COUNT(*) INTO unwatched FROM movie_predecessors mp
+    WHERE mp.successor_id = mov_id
+    AND mp.predecessor_id NOT IN (
+        SELECT DISTINCT ms.movie_id FROM movie_session ms
+        INNER JOIN tickets t ON ms.session_id = t.session_id
+        WHERE t.user_name = new.user_name
+    );
+    
     IF unwatched > 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Watch predecessors first!';
-
-
-
-END$$
+    END IF;
+END $$
 DELIMITER ;
-
