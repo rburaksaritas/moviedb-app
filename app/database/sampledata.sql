@@ -55,8 +55,8 @@ VALUES
 -- Insert movie predecessors
 INSERT INTO movie_predecessors (successor_id, predecessor_id)
 VALUES
-    ('20001', '20006'),
-    ('20007', '20001');
+    ('20006', '20001'),
+    ('20007', '20006');
 
 -- Insert genres
 INSERT INTO genres (genre_id, genre_name)
