@@ -60,7 +60,8 @@ function AudienceDashboard({ currentUser }) {
             });
     };
 
-    const buyTicket = () => {
+    const buyTicket = (e) => {
+        e.preventDefault();
         fetch('/audience-dashboard/buy-ticket', {
             method: 'POST',
             headers: {
