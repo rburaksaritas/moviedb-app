@@ -9,12 +9,16 @@ app = Flask(__name__)
 def execute_query(query, args=None):
     connection = mysql.connector.connect(**db_config)
     cursor = connection.cursor()
-    cursor.execute(query, args)
-    result = cursor.fetchall()
-    connection.commit()
-    cursor.close()
-    connection.close()
-    return result
+    try:
+        cursor.execute(query, args)
+        result = cursor.fetchall()
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return result
+    except mysql.connector.Error as error:
+        print(error)
+        return {"error": str(error)}
 
 # Login route
 @app.route("/login", methods=["POST"])
