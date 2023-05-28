@@ -523,16 +523,30 @@ def get_movies_list():
         # Perform the necessary database operation to fetch the movies list
         
         query = """
-        SELECT movies.movie_id, movies.movie_name, directors_agreements.director_surname, rating_platforms.platform_name, 
-               occupied_slots.theatre_id, occupied_slots.time_slot, GROUP_CONCAT(movie_predecessors.predecessor_id SEPARATOR ', ') AS predecessors
-        FROM movies
-        JOIN directors_agreements ON movies.director_name = directors_agreements.director_name
-        JOIN rating_platforms ON directors_agreements.platform_id = rating_platforms.platform_id
-        JOIN movie_session ON movies.movie_id = movie_session.movie_id
-        JOIN occupied_slots ON movie_session.session_id = occupied_slots.session_id
-        LEFT JOIN movie_predecessors ON movies.movie_id = movie_predecessors.successor_id
-        GROUP BY movies.movie_id, movies.movie_name, directors_agreements.director_surname, rating_platforms.platform_name, 
-                 occupied_slots.theatre_id, occupied_slots.time_slot
+        SELECT
+            m.movie_id,
+            m.movie_name,
+            da.director_surname,
+            rp.platform_name,
+            os.theatre_id,
+            os.time_slot,
+            IFNULL(mp.predecessors, 'None') AS predecessors
+        FROM
+            movies m
+            JOIN directors_agreements da ON m.director_name = da.user_name
+            JOIN rating_platforms rp ON da.platform_id = rp.platform_id
+            JOIN movie_session ms ON m.movie_id = ms.movie_id
+            JOIN occupied_slots os ON ms.session_id = os.session_id
+            LEFT JOIN (
+                SELECT
+                    successor_id,
+                    GROUP_CONCAT(predecessor_id SEPARATOR ', ') AS predecessors
+                FROM
+                    movie_predecessors
+                GROUP BY
+                    successor_id
+            ) mp ON m.movie_id = mp.successor_id;
+
         """
         result = execute_query(query)
 
