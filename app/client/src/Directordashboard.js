@@ -74,8 +74,9 @@ function Directordashboard({ currentUser }) {
         movie_name: '',
         theatre_id: '',
         time_slot: '',
+        duration: '',
         session_id: '',
-        session_date: '',
+        session_date: ''
     });
 
     const [predecessorData, setPredecessorData] = useState({
@@ -136,6 +137,7 @@ function Directordashboard({ currentUser }) {
                     movie_name: '',
                     theatre_id: '',
                     time_slot: '',
+                    duration: '',
                     session_id: '',
                     session_date: ''
                 })
@@ -344,6 +346,12 @@ function Directordashboard({ currentUser }) {
                                 type="text"
                                 value={newMovie.time_slot}
                                 onChange={(e) => setNewMovie({ ...newMovie, time_slot: e.target.value })}
+                            />
+                            <label>Duration:</label>
+                            <input
+                                type="text"
+                                value={newMovie.duration}
+                                onChange={(e) => setNewMovie({ ...newMovie, duration: e.target.value })}
                             />
                             <label>New Session ID:</label>
                             <input
