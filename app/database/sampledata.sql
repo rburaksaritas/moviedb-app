@@ -19,17 +19,11 @@ VALUES
 -- Insert audience
 INSERT INTO audience (user_name, audience_password, audience_name, audience_surname)
 VALUES
-    ('steven.jobs', 'apple123', 'Steven', 'Jobs'),
     ('minion.lover', 'bello387', 'Felonius', 'Gru'),
     ('steve.wozniak', 'pass4321', 'Ryan', 'Andrews'),
-    ('he.gongmin', 'passwordpass', 'He', 'Gongmin'),
-    ('carm.galian', 'madrid9897', 'Carmelita', 'Galiano'),
-    ('kron.helene', 'helenepass', 'Helene', 'Kron'),
     ('arzucan.ozgur', 'deneme123', 'Arzucan', 'Ozgur'),
     ('egemen.isguder', 'deneme124', 'Egemen', 'Isguder'),
-    ('busra.oguzoglu', 'deneme125', 'Busra', 'Oguzoglu'),
-    ('peter.weir', 'peter_weir879', 'Peter', 'Weir'),
-    ('kyle.balda', 'mynameiskyle9', 'Kyle', 'Balda');
+    ('busra.oguzoglu', 'deneme125', 'Busra', 'Oguzoglu');
 
 -- Insert subscribes
 INSERT INTO subscribes (user_name, platform_id)
