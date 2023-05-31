@@ -24,7 +24,7 @@ VALUES
     ('steve.wozniak', 'pass4321', 'Ryan', 'Andrews'),
     ('arzucan.ozgur', 'deneme123', 'Arzucan', 'Ozgur'),
     ('egemen.isguder', 'deneme124', 'Egemen', 'Isguder'),
-    ('busra.oguzoglu', 'deneme125', 'Busra', 'Oguzoglu'),
+    ('busra.oguzoglu', 'deneme125', 'Busra', 'Oguzoglu');
 
 -- Insert subscribes
 INSERT INTO subscribes (user_name, platform_id)
@@ -122,27 +122,27 @@ VALUES
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100002', 'steven.jobs', '50001');
+('100002', 'steve.wozniak', '50004');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100003', 'steve.wozniak', '50004');
+('100003', 'steve.wozniak', '50005');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100004', 'steve.wozniak', '50005');
+('100004', 'arzucan.ozgur', '50006');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100005', 'arzucan.ozgur', '50006');
+('100005', 'egemen.isguder', '50001');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100006', 'egemen.isguder', '50008');
+('100006', 'egemen.isguder', '50004');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100007', 'egemen.isguder', '50004');
+('100007', 'egemen.isguder', '50008');
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
@@ -150,11 +150,7 @@ VALUES
 
 INSERT INTO tickets (ticket_id, user_name, session_id)
 VALUES
-('100009', 'egemen.isguder', '50001');
-
-INSERT INTO tickets (ticket_id, user_name, session_id)
-VALUES
-('100010', 'busra.oguzoglu', '50009');
+('100009', 'busra.oguzoglu', '50009');
 
 
 -- Insert ratings
