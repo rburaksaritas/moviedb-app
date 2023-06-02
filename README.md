@@ -13,6 +13,10 @@ The MovieDB-App provides the following features:
 - The Audience can view movie listings, buy tickets, and rate movies.
 - Overall rating calculation for movies. 
 
+## Demo Preview
+
+Short demo showcase of the app can be found at https://youtu.be/AaLDZHEybk0.
+
 ## Project Structure
 
 The project follows a specific structure to organize the codebase:
